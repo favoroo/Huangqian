@@ -390,6 +390,8 @@ void main() {
   vec2 aspect = vec2(uResolution.x / uResolution.y, 1.0);
   float spread = length((cellUv - 0.5) * aspect) / length(aspect * 0.5);
   float appear = step(spread * 0.72 + bayer(cell + vec2(3.0, 5.0)) * 0.28, uIntro * 1.001);
+  // 画面外留白保持纯墨色，不参与抖动，避免出现发灰的底色块
+  color = mix(color, uInk, 1.0 - framed);
   fragColor = vec4(mix(uInk, color, appear), 1.0);
 }
 `;

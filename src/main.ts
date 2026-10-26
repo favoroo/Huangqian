@@ -105,25 +105,23 @@ function compactHTML(w: Work): string {
   if (!host) return;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   try {
+    // 完全复刻 React Bits 官方 demo 的参数组合
     new DitherVeil(host, {
-      src: `${base}img/avatar.jpg`,
-      fit: 'cover',
+      src: `${base}img/veil-photo.webp`,
+      fit: 'contain',
       pattern: 'floyd',
       pixelSize: 2,
-      inkColor: '#0a0a0a',
-      paperColor: '#eae6dd',
-      rimColor: '#e0342b',
-      rim: 0.3,
-      contrast: 1.2,
-      revealRadius: 180,
+      inkColor: '#000000',
+      paperColor: '#f4f1ea',
+      revealRadius: 200,
       softness: 0.6,
-      linger: 1.2,
+      linger: 1,
       wander: !reduced,
       clickBurst: !reduced,
     });
   } catch {
-    // WebGL 不可用：退回静态头像
-    host.innerHTML = `<img src="${base}img/avatar.jpg" alt="黄谦的肖像" />`;
+    // WebGL 不可用：退回静态图
+    host.innerHTML = `<img src="${base}img/veil-photo.webp" alt="" />`;
   }
 })();
 

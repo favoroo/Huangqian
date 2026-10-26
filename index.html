@@ -9,7 +9,7 @@
     <meta property="og:title" content="黄谦 — 独立开发者" />
     <meta property="og:description" content="把想法做成能跑的东西。" />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="%BASE_URL%img/avatar.jpg" />
+    <meta property="og:image" content="%BASE_URL%img/veil-photo.webp" />
     <script type="module" src="/src/main.ts" defer></script>
   </head>
   <body>
@@ -56,36 +56,58 @@
           </h1>
           <div class="hero__rule reveal-rule" aria-hidden="true"></div>
           <p class="hero__tag">
-            <span class="reveal-line"><span style="--rd:200ms">把想法做成能跑的东西。</span></span>
+            <span class="reveal-line"><span style="--rd: 200ms">把想法做成能跑的东西。</span></span>
           </p>
         </div>
-        <div class="hero__veil reveal" style="--rd:150ms" id="veil" role="img" aria-label="黄谦的肖像：鼠标扫过处从点阵中显出彩色照片"></div>
+        <div
+          class="hero__veil"
+          id="veil"
+          role="img"
+          aria-label="抖动点阵图像：鼠标扫过处显出彩色原图"
+        ></div>
       </div>
     </section>
 
-    <!-- ===== 01 CAREER ===== -->
+    <!-- ===== 职业经历 ===== -->
     <section class="section" id="career" data-no="01">
       <div class="container">
-        <p class="section__index reveal">01 — CAREER</p>
-        <h2 class="career__line">
-          <span class="reveal-line"><span>从汽车诊断工程师，</span></span>
-          <span class="reveal-line"><span style="--rd:150ms">到部门 <em>AI 提效负责人</em>。</span></span>
-        </h2>
+        <p class="section__index reveal">职业经历</p>
+        <div class="career">
+          <dl class="career__facts reveal">
+            <div class="career__fact">
+              <dt>时间</dt>
+              <dd>2021.07 — 至今</dd>
+            </div>
+            <div class="career__fact">
+              <dt>公司</dt>
+              <dd>湖南省道通科技有限公司</dd>
+            </div>
+          </dl>
+          <div class="career__story">
+            <h2 class="career__line">
+              <span class="reveal-line"><span>从汽车技术工程师，</span></span>
+              <span class="reveal-line"><span style="--rd:150ms">到部门 <em>AI 提效负责人</em>。</span></span>
+            </h2>
+            <a class="career__cta reveal" style="--rd:300ms" href="https://favoroo.github.io/Q-profile/" target="_blank" rel="noopener">
+              查看完整职业履历 <span class="arrow" aria-hidden="true">→</span>
+            </a>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- ===== 02 WORKS ===== -->
+    <!-- ===== 当前作品 ===== -->
     <section class="section" id="works" data-no="02">
       <div class="container">
-        <p class="section__index reveal">02 — WORKS</p>
+        <p class="section__index reveal">当前作品</p>
         <div class="works" id="worksGrid"></div>
       </div>
     </section>
 
-    <!-- ===== 03 CONTACT ===== -->
+    <!-- ===== 联系 ===== -->
     <footer class="contact" id="contact" data-no="03">
       <div class="container">
-        <p class="section__index reveal">03 — CONTACT</p>
+        <p class="section__index reveal">联系我</p>
         <h2 class="contact__big">
           <span class="reveal-line"><span>有想法，聊聊。</span></span>
         </h2>
