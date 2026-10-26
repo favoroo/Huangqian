@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>黄谦 — 汽车技术工程师 / 独立开发者</title>
+    <meta
+      name="description"
+      content="黄谦的个人作品集：从传统汽车技术工程师到部门 AI 提效负责人；Godot《剑士》、Cocos 嘟嘟羽毛球、Flutter QNote、微信小程序 Q 菜单。"
+    />
+    <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
+    <meta property="og:title" content="黄谦 — 汽车技术工程师 / 独立开发者" />
+    <meta
+      property="og:description"
+      content="从传统技术开发者到部门 AI 提效负责人；游戏、应用与小程序的独立开发作品集。"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="%BASE_URL%img/poster.webp" />
+    <script type="module" src="/src/main.ts" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#hero" style="position: absolute; left: -9999px">跳到主内容</a>
+
+    <!-- ===== NAV ===== -->
+    <header class="nav">
+      <div class="container nav__inner">
+        <a class="nav__logo" href="#hero">
+          HQ<em>/</em>
+          <span class="label">HUANGQIAN</span>
+        </a>
+        <nav class="nav__links" aria-label="主导航">
+          <a class="nav__link" href="#career"><span class="label">01</span>&nbsp;经历</a>
+          <a class="nav__link" href="#games"><span class="label">02</span>&nbsp;游戏</a>
+          <a class="nav__link" href="#mobile"><span class="label">03</span>&nbsp;移动端</a>
+          <a class="nav__link" href="#index"><span class="label">04</span>&nbsp;索引</a>
+          <a class="nav__link" href="#contact"><span class="label">05</span>&nbsp;联系</a>
+          <button
+            class="nav__audio"
+            id="bgmToggle"
+            aria-pressed="false"
+            aria-label="切换背景音乐"
+            title="背景音乐"
+          >
+            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M6 3v10l6-3.2V6.2L6 3z" fill="currentColor" />
+              <path class="bgm-off" d="M1.5 1.5 L14.5 14.5" stroke="currentColor" stroke-width="1.6" />
+            </svg>
+          </button>
+          <button class="nav__burger" id="burger" aria-label="打开菜单" aria-expanded="false">
+            <span></span>
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <!-- ===== fullscreen menu (mobile) ===== -->
+    <div class="menu" id="menu" aria-hidden="true">
+      <div class="container menu__head">
+        <span class="label">MENU</span>
+        <button class="menu__close" id="menuClose" aria-label="关闭菜单">✕</button>
+      </div>
+      <div class="container">
+        <nav class="menu__list" aria-label="移动导航">
+          <a class="menu__item" href="#career"><span class="label">01</span>公司经历</a>
+          <a class="menu__item" href="#games"><span class="label">02</span>游戏开发</a>
+          <a class="menu__item" href="#mobile"><span class="label">03</span>移动端开发</a>
+          <a class="menu__item" href="#index"><span class="label">04</span>项目索引</a>
+          <a class="menu__item" href="#contact"><span class="label">05</span>联系我</a>
+        </nav>
+      </div>
+    </div>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero" id="hero">
+      <div class="container grid-12 hero__grid">
+        <div class="hero__text">
+          <p class="hero__eyebrow label reveal">
+            <span class="tick" aria-hidden="true"></span>
+            PORTFOLIO 2026 · CHANGSHA
+          </p>
+          <h1 class="hero__name">
+            <span class="reveal-line"><span>黄谦<em>。</em></span></span>
+          </h1>
+          <p class="hero__headline">
+            <span class="reveal-line"><span style="--rd:120ms">从汽车工程到 AI 提效，</span></span>
+            <span class="reveal-line"><span style="--rd:240ms">从代码到游戏。</span></span>
+          </p>
+          <p class="hero__roles label reveal" style="--rd:380ms">
+            <span>AUTOMOTIVE&nbsp;ENGINEER</span>
+            <span>GAME&nbsp;DEVELOPER</span>
+            <span>INDIE&nbsp;BUILDER</span>
+          </p>
+          <div class="hero__actions reveal" style="--rd:460ms">
+            <a class="btn" href="#games">查看作品 <span class="arrow" aria-hidden="true">↓</span></a>
+            <a class="btn btn--ghost" href="#career">职业路径 <span class="arrow" aria-hidden="true">→</span></a>
+          </div>
+        </div>
+        <figure class="hero__poster reveal-clip" style="--rd:200ms">
+          <img src="%BASE_URL%img/poster.webp" alt="瑞士国际主义几何构成海报：网格上的红方块、黑圆与对角线" width="1376" height="768" />
+          <figcaption class="label">FORM FOLLOWS FUNCTION — 形式服从功能</figcaption>
+        </figure>
+      </div>
+      <div class="ticker" aria-hidden="true">
+        <div class="ticker__track" id="tickerTrack"></div>
+      </div>
+    </section>
+
+    <!-- ===== 01 CAREER ===== -->
+    <section class="section" id="career">
+      <div class="container">
+        <header class="section__head">
+          <p class="section__index label reveal">01 / CAREER</p>
+          <h2 class="section__title">
+            <span class="reveal-line"><span>公司经历</span></span>
+          </h2>
+          <p class="section__note label reveal" style="--rd:200ms">AUTOMOTIVE → AI</p>
+        </header>
+
+        <div class="career__story">
+          <p class="career__lead reveal">
+            扎根汽车工程一线，从<em>传统技术开发者</em>，成长为<em>部门 AI 提效负责人</em>。
+          </p>
+          <p class="career__about reveal" style="--rd:150ms">
+            我是黄谦，现就职于道通科技，担任汽车技术工程师。在四轮定位、VIN
+            码解析与新能源高压测量等核心业务中积累了扎实的落地经验；近两年将技术视野拓展至
+            AI Agent 自动化提效，主导推进翻译整改 Agent、海量资料治理与智能知识库检索工具的设计与落地，以数字化工具重塑团队生产力。
+          </p>
+        </div>
+
+        <div class="timeline">
+          <div class="timeline__row reveal">
+            <div>
+              <p class="timeline__date label">2017.09 — 2021.06</p>
+              <p class="timeline__what">中南林业科技大学 · 汽车服务工程</p>
+              <p class="timeline__meta">本科 · 专业前 20%</p>
+            </div>
+          </div>
+          <div class="timeline__row reveal" style="--rd:150ms">
+            <div>
+              <p class="timeline__date label">2021.06 — 至今</p>
+              <p class="timeline__what">道通科技 · 汽车技术工程师</p>
+              <p class="timeline__meta">现任部门 AI 提效负责人 · 开放技术交流</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats reveal" style="--cols: 4" id="careerStats">
+          <div>
+            <p class="stats__num"><span data-count="6">0</span></p>
+            <p class="stats__label label">个核心项目</p>
+          </div>
+          <div>
+            <p class="stats__num"><span data-count="3">0</span></p>
+            <p class="stats__label label">类 AI Agent 工具</p>
+          </div>
+          <div>
+            <p class="stats__num"><span data-count="50">0</span><em>+</em></p>
+            <p class="stats__label label">个 VIN 解析品牌</p>
+          </div>
+          <div>
+            <p class="stats__num"><span data-count="4">0</span></p>
+            <p class="stats__label label">年持续提效实践</p>
+          </div>
+        </div>
+
+        <div class="career__list" id="careerList"></div>
+      </div>
+    </section>
+
+    <!-- ===== 02 GAMES ===== -->
+    <section class="section" id="games">
+      <div class="container">
+        <header class="section__head">
+          <p class="section__index label reveal">02 / GAMES</p>
+          <h2 class="section__title">
+            <span class="reveal-line"><span>游戏开发</span></span>
+          </h2>
+          <p class="section__note label reveal" style="--rd:200ms">GODOT · COCOS</p>
+        </header>
+        <div class="cards reveal" id="gameCards"></div>
+      </div>
+    </section>
+
+    <!-- ===== 03 MOBILE ===== -->
+    <section class="section" id="mobile">
+      <div class="container">
+        <header class="section__head">
+          <p class="section__index label reveal">03 / MOBILE</p>
+          <h2 class="section__title">
+            <span class="reveal-line"><span>移动端开发</span></span>
+          </h2>
+          <p class="section__note label reveal" style="--rd:200ms">FLUTTER · WECHAT</p>
+        </header>
+        <div class="cards reveal" id="mobileCards"></div>
+      </div>
+    </section>
+
+    <!-- ===== 04 PROJECT INDEX ===== -->
+    <section class="section" id="index">
+      <div class="container">
+        <header class="section__head">
+          <p class="section__index label reveal">04 / INDEX</p>
+          <h2 class="section__title">
+            <span class="reveal-line"><span>项目索引</span></span>
+          </h2>
+          <p class="section__note label reveal" style="--rd:200ms">TOTAL 05</p>
+        </header>
+        <div class="index__list reveal" id="indexList"></div>
+      </div>
+    </section>
+
+    <!-- ===== 05 CONTACT ===== -->
+    <footer class="contact" id="contact">
+      <div class="container">
+        <div class="contact__grid">
+          <h2 class="contact__big">
+            <span class="reveal-line"><span>Never idle<em>.</em></span></span>
+          </h2>
+          <div class="contact__side reveal" style="--rd:200ms">
+            <a class="contact__link" href="mailto:favoro@qq.com">
+              <span>favoro@qq.com</span><span class="arrow" aria-hidden="true">→</span>
+            </a>
+            <a class="contact__link" href="https://github.com/favoroo" target="_blank" rel="noopener">
+              <span>github.com/favoroo</span><span class="arrow" aria-hidden="true">→</span>
+            </a>
+            <a class="contact__link" href="https://favoroo.github.io/Q-profile/" target="_blank" rel="noopener">
+              <span>完整职业主页</span><span class="arrow" aria-hidden="true">→</span>
+            </a>
+          </div>
+        </div>
+        <div class="contact__bottom">
+          <span class="label">© 2026 黄谦 · HUANGQIAN</span>
+          <span class="label">瑞士国际风格 / SWISS INTERNATIONAL STYLE</span>
+        </div>
+      </div>
+    </footer>
+
+    <!-- ===== detail overlay ===== -->
+    <div class="overlay" id="overlay" data-open="false" role="dialog" aria-modal="true" aria-label="项目详情">
+      <div class="overlay__scrim" id="overlayScrim"></div>
+      <div class="overlay__panel" id="overlayPanel">
+        <div class="overlay__bar">
+          <p class="label" id="overlayCrumb">—</p>
+          <button class="overlay__close" id="overlayClose" aria-label="关闭详情">
+            <span class="word">关闭</span> <span aria-hidden="true">✕</span>
+          </button>
+        </div>
+        <div class="overlay__body" id="overlayBody"></div>
+      </div>
+    </div>
+
+    <audio class="bgm" id="bgm" loop preload="none" src="%BASE_URL%audio/bgm.mp3"></audio>
+  </body>
+</html>
