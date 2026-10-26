@@ -701,6 +701,11 @@ body[data-menu-open] {
   color: var(--ink);
   overflow: hidden;
 }
+/* 未打开的弹窗必须保持隐藏：移动端整屏布局给 .lightbox 写了 display:flex，
+   会盖过 UA 对关闭 dialog 的 display:none，让空弹窗漏进页面流末尾 */
+.lightbox:not([open]) {
+  display: none;
+}
 .lightbox::backdrop {
   background: rgba(0, 0, 0, 0.84);
   backdrop-filter: blur(6px);
@@ -1230,8 +1235,9 @@ body[data-menu-open] {
     font-size: 16px;
   }
 
-  /* 竖屏：弹窗铺满全屏，视频在中间按比例自适应，不吃掉上下空间 */
-  .lightbox {
+  /* 竖屏：弹窗铺满全屏，视频在中间按比例自适应，不吃掉上下空间
+     （只作用于打开状态；关闭态由上面的 :not([open]) 规则压住） */
+  .lightbox[open] {
     width: 100vw;
     height: 100svh;
     max-height: none;
