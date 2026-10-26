@@ -415,6 +415,8 @@ body[data-menu-open] {
   padding-block: clamp(88px, 14vh, 160px);
   border-top: 1px solid var(--line);
   overflow: hidden;
+  /* 锚点定位时抵消自身的大上内边距，让标题贴到导航栏下方（留 12px 呼吸） */
+  scroll-margin-top: calc(12px - clamp(88px, 14vh, 160px));
 }
 
 .section__index {
@@ -422,6 +424,10 @@ body[data-menu-open] {
   letter-spacing: 0.28em;
   color: var(--dim);
   margin-bottom: clamp(32px, 6vh, 64px);
+}
+/* 部分小标题居中，与下方居中的内容列对齐 */
+.section__index--center {
+  text-align: center;
 }
 
 /* 超大描边编号背景字 */
@@ -464,15 +470,17 @@ body[data-menu-open] {
   color: var(--red);
 }
 
+/* 信息栏右端：细框小按钮，缩到与 时间/公司 同一视觉量级 */
 .career__cta {
   display: inline-flex;
   align-items: center;
-  gap: 14px;
-  margin-top: clamp(28px, 4.5vh, 48px);
-  padding: 14px 30px;
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  font-size: 15px;
-  letter-spacing: 0.02em;
+  gap: 10px;
+  flex: none;
+  padding: 9px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--dim);
   transition:
     background-color var(--dur) var(--ease),
     border-color var(--dur) var(--ease),
@@ -488,17 +496,25 @@ body[data-menu-open] {
   color: var(--ink);
 }
 .career__cta:hover .arrow {
-  transform: translateX(6px);
+  transform: translateX(5px);
 }
 
-/* 顶部信息栏：时间 / 公司 横向并排 */
+/* 顶部信息栏：时间 / 公司 靠左，履历按钮靠右 */
+.career__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(20px, 3vw, 48px);
+  padding-bottom: clamp(20px, 3vh, 30px);
+  border-bottom: 1px solid var(--line);
+  margin-bottom: clamp(32px, 5vh, 56px);
+}
+
 .career__facts {
   display: flex;
   flex-wrap: wrap;
   gap: clamp(28px, 6vw, 96px);
-  padding-bottom: clamp(20px, 3vh, 30px);
-  border-bottom: 1px solid var(--line);
-  margin-bottom: clamp(32px, 5vh, 56px);
 }
 .career__fact {
   display: flex;
@@ -519,25 +535,351 @@ body[data-menu-open] {
   overflow-wrap: anywhere;
 }
 
+/* ---------- 录屏窗口：三扇并排的小窗口 ---------- */
+
+.reels {
+  margin-top: clamp(44px, 6vh, 72px);
+  padding-top: clamp(20px, 3vh, 28px);
+  border-top: 1px solid var(--line);
+}
+
+.reels__label {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: clamp(18px, 2.6vh, 26px);
+  font-size: 12px;
+  letter-spacing: 0.28em;
+  color: var(--dim);
+}
+.reels__label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+.reels__row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(14px, 1.8vw, 22px);
+}
+
+.reel {
+  display: block;
+  width: 100%;
+  padding: 0;
+  text-align: left;
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  transition:
+    border-color var(--dur) var(--ease),
+    background-color var(--dur) var(--ease);
+}
+.reel:hover,
+.reel:focus-visible {
+  border-color: rgba(255, 255, 255, 0.34);
+  background: var(--bg-hover);
+}
+
+/* 窗口标题栏 —— 让它读起来像一扇窗口而不是一张缩略图 */
+.reel__chrome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--line);
+}
+.reel__dots {
+  display: flex;
+  gap: 4px;
+}
+.reel__dots i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  transition: background-color var(--dur) var(--ease);
+}
+.reel:hover .reel__dots i:first-child {
+  background: var(--red);
+}
+.reel__time {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.reel__frame {
+  position: relative;
+  display: block;
+  aspect-ratio: 1918 / 952;
+  background: #000;
+  overflow: hidden;
+}
+.reel__frame video,
+.reel__poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.reel__poster {
+  transition:
+    opacity 420ms var(--ease),
+    transform 700ms var(--ease);
+}
+.reel:hover .reel__poster {
+  transform: scale(1.02);
+}
+/* 预览时封面淡出，露出正在播放的视频 */
+.reel.is-previewing .reel__poster {
+  opacity: 0;
+}
+
+.reel__play {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: clamp(34px, 3.2vw, 46px);
+  height: clamp(34px, 3.2vw, 46px);
+  border-radius: 50%;
+  background: var(--red);
+  display: grid;
+  place-items: center;
+  transition:
+    transform var(--dur) var(--ease),
+    opacity 300ms var(--ease),
+    background-color var(--dur) var(--ease);
+}
+.reel__play svg {
+  width: 34%;
+  margin-left: 6%;
+  fill: var(--ink);
+}
+.reel:hover .reel__play {
+  transform: scale(1.12);
+  background: #f04036;
+}
+.reel.is-previewing .reel__play {
+  opacity: 0;
+}
+
+.reel__caption {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 12px clamp(12px, 1.2vw, 16px) clamp(14px, 1.4vw, 18px);
+  min-width: 0;
+}
+.reel__name {
+  font-family: var(--serif);
+  font-size: clamp(15px, 1.35vw, 18px);
+  line-height: 1.35;
+}
+.reel__line {
+  font-size: 12px;
+  color: var(--dim);
+  line-height: 1.4;
+}
+
+/* ---------- 录屏弹窗 ---------- */
+
+.lightbox {
+  width: min(1120px, 92vw);
+  max-width: none;
+  max-height: 92vh;
+  /* 全局 reset 抹掉了 UA 给 dialog 的 margin:auto，这里补回来才能居中 */
+  margin: auto;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: #0a0a0a;
+  color: var(--ink);
+  overflow: hidden;
+}
+.lightbox::backdrop {
+  background: rgba(0, 0, 0, 0.84);
+  backdrop-filter: blur(6px);
+}
+.lightbox[open] {
+  animation: lightbox-in 320ms var(--ease);
+}
+.lightbox[open]::backdrop {
+  animation: backdrop-in 320ms var(--ease);
+}
+@keyframes lightbox-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(10px);
+  }
+}
+@keyframes backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* 标题栏自身高度，弹窗用 --lb-head 给视频区让位；
+   有分段标签时换一档更高的值 */
+.lightbox {
+  --lb-head: 32px;
+}
+.lightbox.has-tabs {
+  --lb-head: 47px;
+}
+
+.lightbox__bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px 4px 18px;
+  border-bottom: 1px solid var(--line);
+}
+.lightbox__title {
+  flex: 1;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--dim);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lightbox__close {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  font-size: 17px;
+  color: var(--dim);
+  transition:
+    color var(--dur) var(--ease),
+    background-color var(--dur) var(--ease);
+}
+.lightbox__close:hover {
+  color: var(--ink);
+  background: var(--bg-hover);
+}
+
+.lightbox__stage {
+  display: block;
+  background: #000;
+  aspect-ratio: 1918 / 952;
+  max-height: calc(92vh - var(--lb-head));
+}
+.lightbox__stage video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+}
+
+/* ---------- 弹窗分段标签（同一窗口有多段录屏时出现） ---------- */
+
+.lightbox__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+.lightbox__tabs[hidden] {
+  display: none;
+}
+.lightbox__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px;
+  font-size: 12.5px;
+  color: var(--dim);
+  border: 1px solid transparent;
+  transition:
+    color var(--dur) var(--ease),
+    background-color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease);
+}
+.lightbox__tab em {
+  font-style: normal;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: inherit;
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
+.lightbox__tab:hover {
+  color: var(--ink);
+  background: var(--bg-hover);
+}
+.lightbox__tab.is-active {
+  color: var(--ink);
+  border-color: rgba(255, 255, 255, 0.22);
+  background: var(--bg-hover);
+}
+.lightbox__tab.is-active::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--red);
+}
+
 /* ==========================================================================
    02 WORKS
    ========================================================================== */
 
 .works {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(52px, 8vh, 88px);
+}
+
+/* ---------- 分组：游戏 / 应用 ---------- */
+
+.works__group {
+  min-width: 0;
+}
+
+/* 标签留在左侧与「作品」对齐，细线向右铺到内容区边缘 */
+.works__label {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-left: clamp(16px, 2.2vw, 32px);
+  margin-bottom: clamp(18px, 2.6vh, 28px);
+  font-size: 12px;
+  letter-spacing: 0.28em;
+  color: var(--dim);
+}
+.works__label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+.works__items {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: clamp(20px, 2.5vw, 36px);
-  /* 整体收窄居中，视频不至于铺满版面 */
-  max-width: 840px;
+  /* 视频段收窄居中，视频不至于铺满版面 */
+  max-width: 700px;
   margin-inline: auto;
+}
+
+/* 应用段没有视频，比视频段宽一些但不铺满 */
+.works__group--app .works__items {
+  max-width: 900px;
 }
 
 .work {
   min-width: 0;
 }
 
-/* 剑士：主推，占满收窄后的整行 */
-.work--swordsman {
+/* 两个游戏各自占满整行，视频是这一段的主角 */
+.work--swordsman,
+.work--dudu {
   grid-column: 1 / -1;
 }
 
@@ -640,25 +982,10 @@ body[data-menu-open] {
   transform: translateX(6px);
 }
 
-/* ---------- 次席视频卡 + 紧凑图标栏 ---------- */
+/* ---------- 应用段：三张紧凑卡一行排开 ---------- */
 
-.work--dudu {
-  grid-column: span 7;
-}
-.works__rail {
-  grid-column: span 5;
-  display: flex;
-  flex-direction: column;
-  gap: clamp(20px, 2.5vw, 36px);
-  min-width: 0;
-  /* 与左侧视频卡整行同高，两张图标卡平分 */
-  height: 100%;
-}
-
-/* 图标栏整体只占视频卡那一行的高度，两张卡平分 */
-.works__rail .card {
-  flex: 1 1 0;
-  min-height: 0;
+.works__items .card--compact {
+  grid-column: span 4;
 }
 
 .card {
@@ -734,15 +1061,15 @@ body[data-menu-open] {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: clamp(24px, 2.4vw, 34px);
+  gap: clamp(14px, 1.4vw, 18px);
+  padding: clamp(18px, 1.8vw, 24px);
   flex: 1;
 }
 .card--compact .card__icon {
-  width: clamp(64px, 6.5vw, 88px);
-  height: clamp(64px, 6.5vw, 88px);
+  width: clamp(44px, 4.4vw, 56px);
+  height: clamp(44px, 4.4vw, 56px);
   flex: none;
-  border-radius: 16px;
+  border-radius: 12px;
   transition: transform 500ms var(--ease);
 }
 .card--compact:hover .card__icon {
@@ -752,15 +1079,20 @@ body[data-menu-open] {
   padding: 0;
   flex-direction: column;
   align-items: flex-start;
-  gap: 4px;
+  gap: 3px;
+  /* 给右下角的箭头让位 */
+  padding-right: 20px;
 }
 .card--compact .card__name {
-  font-size: clamp(21px, 2.2vw, 27px);
+  font-size: clamp(17px, 1.6vw, 21px);
+}
+.card--compact .card__line {
+  font-size: 12px;
 }
 .card--compact .card__arrow {
   position: absolute;
-  right: clamp(20px, 2.2vw, 30px);
-  bottom: clamp(20px, 2.2vw, 30px);
+  right: clamp(14px, 1.4vw, 20px);
+  bottom: clamp(14px, 1.4vw, 20px);
 }
 
 /* ==========================================================================
@@ -772,6 +1104,8 @@ body[data-menu-open] {
   padding-block: clamp(88px, 14vh, 160px) clamp(40px, 6vh, 72px);
   border-top: 1px solid var(--line);
   overflow: hidden;
+  /* 同 .section：抵消自身的大上内边距 */
+  scroll-margin-top: calc(12px - clamp(88px, 14vh, 160px));
 }
 
 .contact__big {
@@ -841,7 +1175,15 @@ body[data-menu-open] {
   }
 
   .work--dudu,
-  .works__rail {
+  .works__items .card--compact {
+    grid-column: 1 / -1;
+  }
+
+  /* 三扇窗口在中等宽度下排成 2 + 1，避免每个窗口窄到看不清界面 */
+  .reels__row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .reel:first-child {
     grid-column: 1 / -1;
   }
 }
@@ -849,6 +1191,13 @@ body[data-menu-open] {
 @media (max-width: 560px) {
   .hero__tag {
     font-size: 17px;
+  }
+
+  /* 窄屏：履历链接另起一行，避免与 时间/公司 抢位置 */
+  .career__head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 18px;
   }
 
   .work__caption {
@@ -866,6 +1215,52 @@ body[data-menu-open] {
     flex-wrap: wrap;
     row-gap: 2px;
     padding-right: 44px;
+  }
+
+  /* 窄屏：录屏窗口单列堆叠，时长与说明留出可读空间 */
+  .reels__row {
+    grid-template-columns: 1fr;
+  }
+  .reel:first-child,
+  .reel:first-child .reel__frame {
+    grid-column: auto;
+    aspect-ratio: 1918 / 952;
+  }
+  .reel__name {
+    font-size: 16px;
+  }
+
+  /* 竖屏：弹窗铺满全屏，视频在中间按比例自适应，不吃掉上下空间 */
+  .lightbox {
+    width: 100vw;
+    height: 100svh;
+    max-height: none;
+    border: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .lightbox__bar {
+    flex: none;
+    flex-wrap: wrap;
+    row-gap: 0;
+    padding-block: 2px;
+  }
+  /* 标题与关闭键占第一行，分段标签换到第二行，避免挤在一条线上 */
+  .lightbox__title {
+    order: 1;
+  }
+  .lightbox__close {
+    order: 2;
+  }
+  .lightbox__tabs {
+    order: 3;
+    flex: 1 1 100%;
+  }
+  .lightbox__stage {
+    flex: 1;
+    aspect-ratio: auto;
+    max-height: none;
+    min-height: 0;
   }
   .card {
     position: relative;
@@ -914,7 +1309,14 @@ body[data-menu-open] {
   .card__arrow,
   .contact__link,
   .contact__link .arrow,
-  .work__play {
+  .work__play,
+  .reel__poster,
+  .reel__play,
+  .reel__dots i {
     transition: none;
+  }
+  .lightbox[open],
+  .lightbox[open]::backdrop {
+    animation: none;
   }
 }
