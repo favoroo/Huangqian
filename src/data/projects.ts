@@ -10,6 +10,8 @@ export interface Work {
   /** 图标或截图（public/img 下的文件名，含扩展名） */
   media: string;
   mediaAlt: string;
+  /** 名称左侧的小图标 */
+  icon: string;
   /** 在线站点 */
   url: string;
   /** 主推项目：全宽视频大卡 */
@@ -24,6 +26,7 @@ export const works: Work[] = [
     line: 'Godot 动作肉鸽游戏',
     media: 'swordsman-icon.png',
     mediaAlt: '剑士游戏图标',
+    icon: 'swordsman-icon.png',
     url: 'https://favoroo.github.io/Q-xiuxian/site/',
     featured: true,
   },
@@ -34,6 +37,7 @@ export const works: Work[] = [
     line: 'Cocos 休闲竞技游戏',
     media: 'dudu-arena.webp',
     mediaAlt: '嘟嘟羽毛球游戏画面',
+    icon: 'dudu-icon.png',
     url: 'https://favoroo.github.io/Dudu-Badminton/site/',
   },
   {
@@ -43,6 +47,7 @@ export const works: Work[] = [
     line: 'Flutter 笔记应用',
     media: 'qnote-icon.png',
     mediaAlt: 'QNote 应用图标',
+    icon: 'qnote-icon.png',
     url: 'https://favoroo.github.io/QNote/',
   },
   {
@@ -52,6 +57,7 @@ export const works: Work[] = [
     line: '微信小程序',
     media: 'qmenu-logo.svg',
     mediaAlt: 'Q 菜单 logo',
+    icon: 'qmenu-logo.svg',
     url: 'https://favoroo.github.io/Qmenu/',
   },
 ];

@@ -519,10 +519,27 @@ body[data-menu-open] {
 
 .work__caption {
   display: flex;
-  align-items: baseline;
-  gap: clamp(14px, 2vw, 28px);
+  align-items: center;
+  gap: clamp(14px, 1.8vw, 22px);
   padding-top: 18px;
   flex-wrap: wrap;
+}
+.work__icon {
+  width: clamp(44px, 4vw, 56px);
+  height: clamp(44px, 4vw, 56px);
+  flex: none;
+  border-radius: 12px;
+  transition: transform 500ms var(--ease);
+}
+.work--featured:hover .work__icon {
+  transform: scale(1.06);
+}
+.work__meta {
+  display: flex;
+  align-items: baseline;
+  gap: clamp(12px, 1.6vw, 22px);
+  flex-wrap: wrap;
+  min-width: 0;
 }
 .work__name {
   font-family: var(--serif);
@@ -595,9 +612,19 @@ body[data-menu-open] {
 .card__body {
   padding: clamp(18px, 2vw, 26px);
   display: flex;
-  align-items: baseline;
-  gap: 14px;
+  align-items: center;
+  gap: 12px;
   min-width: 0;
+}
+.card__nameIcon {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 9px;
+  transition: transform 500ms var(--ease);
+}
+.card:hover .card__nameIcon {
+  transform: scale(1.08);
 }
 .card__name {
   font-family: var(--serif);
@@ -623,19 +650,20 @@ body[data-menu-open] {
   transform: translateX(6px);
 }
 
-/* 紧凑卡：图标 + 文字横排 */
+/* 紧凑卡：大图标 + 文字垂直居中，箭头固定在右下角 */
 .card--compact {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 18px;
-  padding: clamp(16px, 2vw, 24px);
+  gap: 20px;
+  padding: clamp(24px, 2.4vw, 34px);
   flex: 1;
 }
 .card--compact .card__icon {
-  width: clamp(56px, 6vw, 76px);
-  height: clamp(56px, 6vw, 76px);
+  width: clamp(64px, 6.5vw, 88px);
+  height: clamp(64px, 6.5vw, 88px);
   flex: none;
-  border-radius: 14px;
+  border-radius: 16px;
   transition: transform 500ms var(--ease);
 }
 .card--compact:hover .card__icon {
@@ -651,7 +679,9 @@ body[data-menu-open] {
   font-size: clamp(21px, 2.2vw, 27px);
 }
 .card--compact .card__arrow {
-  align-self: center;
+  position: absolute;
+  right: clamp(20px, 2.2vw, 30px);
+  bottom: clamp(20px, 2.2vw, 30px);
 }
 
 /* ==========================================================================
@@ -746,6 +776,35 @@ body[data-menu-open] {
   .work__go {
     margin-left: 0;
     padding: 8px 0;
+  }
+
+  /* 窄屏：说明独占一行，箭头靠右让位，避免换行后拥挤 */
+  .card__body {
+    flex-wrap: wrap;
+    row-gap: 2px;
+    padding-right: 44px;
+  }
+  .card {
+    position: relative;
+  }
+  .card:not(.card--compact) .card__arrow {
+    position: absolute;
+    right: clamp(18px, 2vw, 26px);
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: 0;
+  }
+  .card--compact .card__arrow {
+    right: clamp(18px, 2vw, 26px);
+    bottom: clamp(18px, 2vw, 26px);
+  }
+  /* 嘟嘟卡：名称与说明各占一行，阅读顺序更清楚 */
+  .card__name {
+    flex: 1 1 100%;
+  }
+  .card__line {
+    flex: 1 1 100%;
+    white-space: normal;
   }
 }
 

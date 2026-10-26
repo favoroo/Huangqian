@@ -22,8 +22,11 @@ function featuredHTML(w: Work): string {
       </button>
     </div>
     <div class="work__caption">
-      <h3 class="work__name">${w.name}</h3>
-      <p class="work__line">${w.line}</p>
+      <img class="work__icon" src="${imgRaw(w.icon)}" alt="" width="56" height="56" />
+      <div class="work__meta">
+        <h3 class="work__name">${w.name}</h3>
+        <p class="work__line">${w.line}</p>
+      </div>
       <a class="work__go" href="${w.url}" target="_blank" rel="noopener">访问站点 <span class="arrow" aria-hidden="true">→</span></a>
     </div>
   </article>`;
@@ -34,6 +37,7 @@ function cardHTML(w: Work, extraClass = ''): string {
   <a class="card reveal ${extraClass}" href="${w.url}" target="_blank" rel="noopener" aria-label="访问 ${w.name} 站点">
     <div class="card__media"><img src="${imgRaw(w.media)}" alt="${w.mediaAlt}" loading="lazy" /></div>
     <div class="card__body">
+      <img class="card__nameIcon" src="${imgRaw(w.icon)}" alt="" width="40" height="40" loading="lazy" />
       <h3 class="card__name">${w.name}</h3>
       <p class="card__line">${w.line}</p>
       <span class="card__arrow" aria-hidden="true">→</span>
