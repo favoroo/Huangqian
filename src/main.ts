@@ -1,228 +1,159 @@
 import './styles/main.css';
-import { careerItems, projects, careerProject, type ProjectDetail } from './data/projects';
+import { works, swordsmanVideo, type Work } from './data/projects';
+import { DitherVeil } from './lib/DitherVeil';
 
 const base = import.meta.env.BASE_URL;
-const img = (name: string) => `${base}img/${name}.webp`;
 const imgRaw = (name: string) => `${base}img/${name}`;
 
 const $ = <T extends HTMLElement>(sel: string) => document.querySelector(sel) as T;
 
-/* ---------- ticker ---------- */
-(function ticker() {
-  const items = [
-    '汽车技术工程师',
-    'AI 提效',
-    'Godot 游戏开发',
-    'Cocos Creator',
-    'Flutter',
-    '微信小程序',
-    '独立开发',
-    'Never idle',
-  ];
-  const unit = items
-    .map((t) => `<span>${t}<em>&nbsp;/&nbsp;</em></span>`)
-    .join('');
-  $('#tickerTrack').innerHTML = unit + unit;
+/* ---------- 作品卡渲染 ---------- */
+
+function featuredHTML(w: Work): string {
+  const sources = swordsmanVideo.sources.map((s) => `<source src="${s.src}" type="${s.type}" />`).join('');
+  return `
+  <article class="work work--featured reveal">
+    <div class="work__video" id="promoWrap">
+      <video id="promoVideo" preload="none" playsinline poster="${swordsmanVideo.poster}" aria-label="剑士游戏演示视频">
+        ${sources}
+      </video>
+      <button class="work__play" id="promoPlay" aria-label="播放剑士演示视频">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.8v16.4c0 .9 1 1.5 1.8 1L21.4 13a1.2 1.2 0 0 0 0-2L7.8 2.9C7 2.4 6 2.9 6 3.8z"/></svg>
+      </button>
+    </div>
+    <div class="work__caption">
+      <h3 class="work__name">${w.name}</h3>
+      <p class="work__line">${w.line}</p>
+      <a class="work__go" href="${w.url}" target="_blank" rel="noopener">访问站点 <span class="arrow" aria-hidden="true">→</span></a>
+    </div>
+  </article>`;
+}
+
+function cardHTML(w: Work, extraClass = ''): string {
+  return `
+  <a class="card reveal ${extraClass}" href="${w.url}" target="_blank" rel="noopener" aria-label="访问 ${w.name} 站点">
+    <div class="card__media"><img src="${imgRaw(w.media)}" alt="${w.mediaAlt}" loading="lazy" /></div>
+    <div class="card__body">
+      <h3 class="card__name">${w.name}</h3>
+      <p class="card__line">${w.line}</p>
+      <span class="card__arrow" aria-hidden="true">→</span>
+    </div>
+  </a>`;
+}
+
+function compactHTML(w: Work): string {
+  return `
+  <a class="card card--compact reveal" href="${w.url}" target="_blank" rel="noopener" aria-label="访问 ${w.name} 站点">
+    <img class="card__icon" src="${imgRaw(w.media)}" alt="${w.mediaAlt}" loading="lazy" />
+    <div class="card__body">
+      <h3 class="card__name">${w.name}</h3>
+      <p class="card__line">${w.line}</p>
+    </div>
+    <span class="card__arrow" aria-hidden="true">→</span>
+  </a>`;
+}
+
+(function renderWorks() {
+  const grid = $('#worksGrid');
+  const [featured, dudu, ...rest] = works;
+  grid.innerHTML = `
+    ${featuredHTML(featured)}
+    ${cardHTML(dudu, 'work--dudu')}
+    <div class="works__rail">
+      ${rest.map((w) => compactHTML(w)).join('')}
+    </div>`;
 })();
 
-/* ---------- career list ---------- */
-(function careerList() {
-  $('#careerList').innerHTML = careerItems
-    .map(
-      (it) => `
-      <button class="career__item" data-career="${it.no}" aria-label="查看 ${it.name} 详情">
-        <span class="career__no label">${it.no}</span>
-        <span class="career__name">${it.name}</span>
-        <span class="career__role">${it.role}</span>
-        <span class="career__open" aria-hidden="true">→</span>
-      </button>`,
-    )
-    .join('');
-  document.querySelectorAll<HTMLButtonElement>('.career__item').forEach((btn) => {
-    btn.addEventListener('click', () => openOverlay(careerProject));
+/* ---------- 剑士视频：点击播放（带声音），滚出暂停 ---------- */
+
+(function promoVideo() {
+  const wrap = $('#promoWrap');
+  const video = document.querySelector('#promoVideo') as HTMLVideoElement;
+  const playBtn = $('#promoPlay') as HTMLButtonElement;
+  if (!wrap || !video || !playBtn) return;
+
+  playBtn.addEventListener('click', () => {
+    video.controls = true;
+    wrap.classList.add('is-playing');
+    void video.play();
   });
+
+  // 播放结束：回到封面态
+  video.addEventListener('ended', () => {
+    video.controls = false;
+    wrap.classList.remove('is-playing');
+    video.load();
+  });
+
+  // 滚出视口自动暂停
+  new IntersectionObserver(
+    ([entry]) => {
+      if (!entry.isIntersecting && !video.paused) video.pause();
+    },
+    { threshold: 0.1 },
+  ).observe(wrap);
 })();
 
-/* ---------- project cards ---------- */
-function cardHTML(p: ProjectDetail, iconMedia?: { src: string; alt: string }) {
-  const media = iconMedia
-    ? `<div class="card__media">
-         <img src="${iconMedia.src}" alt="${iconMedia.alt}" width="128" height="128" loading="lazy">
-         <span class="card__badge label"><em>${p.no}</em>&nbsp;&nbsp;${p.categoryEn}</span>
-       </div>`
-    : `<div class="card__media">
-         <img src="${img(p.gallery[0]?.src ?? '')}" alt="${p.title} 截图" loading="lazy">
-         <span class="card__badge label"><em>${p.no}</em>&nbsp;&nbsp;${p.categoryEn}</span>
-       </div>`;
-  return `
-    <button class="card${iconMedia ? ' card--icon' : ''}" data-id="${p.id}" aria-label="查看 ${p.title} 详情">
-      ${media}
-      <span class="card__body">
-        <span class="card__title">${p.title}<small>${p.titleEn}</small></span>
-        <span class="card__tag">${p.tagline}</span>
-        <span class="card__desc">${p.description}</span>
-        <span class="card__foot">
-          <span class="card__stack label">${p.stack.join(' / ')}</span>
-          <span class="card__cta">详情 <span class="arrow" aria-hidden="true">→</span></span>
-        </span>
-      </span>
-    </button>`;
-}
+/* ---------- DitherVeil 首屏面纱 ---------- */
 
-const [swordsman, dudu, qnote, qmenu] = projects;
-$('#gameCards').innerHTML = [swordsman, dudu].map((p) => cardHTML(p)).join('');
-$('#mobileCards').innerHTML = `
-  ${cardHTML(qnote, { src: imgRaw('qnote-icon.png'), alt: 'QNote 应用图标' })}
-  ${cardHTML(qmenu, { src: imgRaw('qmenu-logo.svg'), alt: 'Q 菜单 logo' })}`;
-
-/* ---------- project index ---------- */
-const indexData = [
-  { p: careerProject, year: '2021—', stack: '汽车工程 / AI Agent / 数据开发' },
-  { p: swordsman, year: '2025—', stack: 'Godot 4.7 · GDScript' },
-  { p: dudu, year: '2025—', stack: 'Cocos Creator 3.8 · TypeScript' },
-  { p: qnote, year: '2025—', stack: 'Flutter / Dart · Riverpod' },
-  { p: qmenu, year: '2026', stack: '微信小程序原生 · 云开发' },
-];
-$('#indexList').innerHTML = indexData
-  .map(
-    ({ p, year, stack }, i) => `
-    <button class="index__row" data-id="${p.id}" aria-label="查看 ${p.title} 详情">
-      <span class="index__no label">${String(i + 1).padStart(2, '0')}</span>
-      <span class="index__name">${p.title}<small>${p.titleEn}</small></span>
-      <span class="index__stack">${stack}</span>
-      <span class="index__year label">${year}</span>
-      <span class="index__go" aria-hidden="true">→</span>
-    </button>`,
-  )
-  .join('');
-
-/* ---------- overlay ---------- */
-const overlay = $('#overlay');
-const overlayPanel = $('#overlayPanel');
-const overlayBody = $('#overlayBody');
-const overlayCrumb = $('#overlayCrumb');
-let lastFocus: HTMLElement | null = null;
-
-function overlayHTML(p: ProjectDetail): string {
-  const stats = p.stats
-    .map(
-      (s) => `<div>
-        <p class="stats__num"><span>${s.value}</span>${s.suffix ? `<em>${s.suffix}</em>` : ''}</p>
-        <p class="stats__label label">${s.label}</p>
-      </div>`,
-    )
-    .join('');
-  const highlights = p.highlights
-    .map(
-      (h, i) => `<li>
-        <span class="label">${String(i + 1).padStart(2, '0')}</span><span>${h}</span>
-      </li>`,
-    )
-    .join('');
-  const gallery = p.gallery.length
-    ? `<div class="ov-gallery">${p.gallery
-        .map(
-          (g) => `<figure>
-            <img src="${img(g.src)}" alt="${g.caption}" loading="lazy">
-            <figcaption>${g.caption}</figcaption>
-          </figure>`,
-        )
-        .join('')}</div>`
-    : '';
-  const links = p.links
-    .map(
-      (l, i) =>
-        `<a class="btn${i ? ' btn--ghost' : ''}" href="${l.url}" target="_blank" rel="noopener">${l.label} <span class="arrow" aria-hidden="true">→</span></a>`,
-    )
-    .join('');
-  return `
-    <header class="ov-head">
-      <p class="ov-eyebrow label"><span class="red">${p.no}</span><span>${p.categoryEn}</span></p>
-      <h3 class="ov-title">${p.title}<small>${p.titleEn}</small></h3>
-      <p class="ov-tag">${p.tagline.replace('，', '<em>，</em>')}</p>
-      <p class="ov-desc">${p.description}</p>
-      <ul class="ov-stack" style="margin-top:18px">${p.stack.map((s) => `<li>${s}</li>`).join('')}</ul>
-    </header>
-    <aside class="ov-side">
-      <div class="stats" style="--cols:2">${stats}</div>
-      <div class="ov-links">${links}</div>
-    </aside>
-    <section class="ov-highlights">
-      <p class="label" style="color:var(--c-gray)">KEY POINTS / 亮点</p>
-      <ol>${highlights}</ol>
-    </section>
-    ${gallery}`;
-}
-
-function openOverlay(p: ProjectDetail) {
-  lastFocus = document.activeElement as HTMLElement;
-  overlayCrumb.textContent = `${p.no} — ${p.title} / ${p.titleEn}`;
-  overlayBody.innerHTML = overlayHTML(p);
-  overlay.dataset.open = 'true';
-  document.body.dataset.overlayOpen = 'true';
-  requestAnimationFrame(() => {
-    overlay.dataset.visible = 'true';
-    overlayPanel.scrollTop = 0;
-    $('#overlayClose').focus();
-  });
-}
-
-function closeOverlay() {
-  if (overlay.dataset.open !== 'true') return;
-  overlay.dataset.visible = 'false';
-  let settled = false;
-  const finish = () => {
-    if (settled) return;
-    settled = true;
-    overlay.removeEventListener('transitionend', finish);
-    overlay.dataset.open = 'false';
-    delete document.body.dataset.overlayOpen;
-    lastFocus?.focus();
-  };
-  overlay.addEventListener('transitionend', finish, { once: true });
-  // transitionend is not guaranteed (interrupted/absent transitions), and a
-  // stuck overlay would leave the page scroll-locked.
-  setTimeout(finish, 500);
-}
-
-document
-  .querySelectorAll<HTMLButtonElement>('.card[data-id], .index__row[data-id]')
-  .forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const p =
-        btn.dataset.id === 'career'
-          ? careerProject
-          : projects.find((x) => x.id === btn.dataset.id);
-      if (p) openOverlay(p);
+(function veil() {
+  const host = $('#veil');
+  if (!host) return;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  try {
+    new DitherVeil(host, {
+      src: `${base}img/avatar.jpg`,
+      fit: 'cover',
+      pattern: 'floyd',
+      pixelSize: 2,
+      inkColor: '#0a0a0a',
+      paperColor: '#eae6dd',
+      rimColor: '#e0342b',
+      rim: 0.3,
+      contrast: 1.2,
+      revealRadius: 180,
+      softness: 0.6,
+      linger: 1.2,
+      wander: !reduced,
+      clickBurst: !reduced,
     });
+  } catch {
+    // WebGL 不可用：退回静态头像
+    host.innerHTML = `<img src="${base}img/avatar.jpg" alt="黄谦的肖像" />`;
+  }
+})();
+
+/* ---------- 移动端全屏菜单 ---------- */
+
+(function menu() {
+  const burger = $('#burger') as HTMLButtonElement;
+  const menuEl = $('#menu');
+  const close = $('#menuClose') as HTMLButtonElement;
+  if (!burger || !menuEl || !close) return;
+
+  const setMenu = (open: boolean) => {
+    if (open) {
+      document.body.dataset.menuOpen = '';
+    } else {
+      delete document.body.dataset.menuOpen;
+    }
+    menuEl.setAttribute('aria-hidden', String(!open));
+    burger.setAttribute('aria-expanded', String(open));
+    if (open) menuEl.querySelector('a')?.focus();
+  };
+  burger.addEventListener('click', () => setMenu(!document.body.hasAttribute('data-menu-open')));
+  close.addEventListener('click', () => setMenu(false));
+  menuEl.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setMenu(false)));
+  addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && document.body.hasAttribute('data-menu-open')) setMenu(false);
   });
-$('#overlayClose').addEventListener('click', closeOverlay);
-$('#overlayScrim').addEventListener('click', closeOverlay);
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && overlay.dataset.open === 'true') closeOverlay();
-});
+})();
 
-/* ---------- mobile menu ---------- */
-const menu = $('#menu');
-const burger = $('#burger');
+/* ---------- 滚动入场（IO + sweep 双保险） ---------- */
 
-function setMenu(open: boolean) {
-  document.body.dataset.menuOpen = String(open);
-  menu.setAttribute('aria-hidden', String(!open));
-  burger.setAttribute('aria-expanded', String(open));
-  if (open) menu.querySelector<HTMLElement>('.menu__item')?.focus();
-}
-burger.addEventListener('click', () => setMenu(document.body.dataset.menuOpen !== 'true'));
-$('#menuClose').addEventListener('click', () => setMenu(false));
-document.querySelectorAll('.menu__item').forEach((a) => a.addEventListener('click', () => setMenu(false)));
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && document.body.dataset.menuOpen === 'true') setMenu(false);
-});
-
-/* ---------- reveal on scroll ---------- */
 (function reveals() {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const targets = [...document.querySelectorAll('.reveal, .reveal-line, .reveal-rule, .reveal-clip')];
+  const targets = [...document.querySelectorAll('.reveal, .reveal-line, .reveal-rule')];
   if (reduced) {
     targets.forEach((t) => t.classList.add('is-in'));
     return;
@@ -235,18 +166,14 @@ document.addEventListener('keydown', (e) => {
   };
   const io = new IntersectionObserver(
     (entries) => {
-      for (const en of entries) {
-        if (en.isIntersecting) {
-          mark(en.target);
-          io.unobserve(en.target);
-        }
+      for (const en of entries) if (en.isIntersecting) {
+        mark(en.target);
+        io.unobserve(en.target);
       }
     },
     { threshold: 0.05, rootMargin: '0px 0px -4% 0px' },
   );
   targets.forEach((t) => io.observe(t));
-  // first-paint correctness: anything already inside the viewport reveals now,
-  // so above-the-fold content never waits for an observer callback.
   const inView = (el: Element) => {
     const r = el.getBoundingClientRect();
     return r.top < innerHeight * 0.96 && r.bottom > 0;
@@ -257,85 +184,4 @@ document.addEventListener('keydown', (e) => {
   // belt & braces: some embedded webviews never deliver IO callbacks;
   // a passive scroll sweep keeps the page correct everywhere.
   addEventListener('scroll', sweep, { passive: true });
-})();
-
-/* ---------- stat count-up ---------- */
-(function counters() {
-  const els = [...document.querySelectorAll<HTMLElement>('[data-count]')];
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const done = new WeakSet<HTMLElement>();
-  const run = (el: HTMLElement) => {
-    if (done.has(el)) return;
-    done.add(el);
-    const target = Number(el.dataset.count);
-    if (reduced) {
-      el.textContent = String(target);
-      return;
-    }
-    const dur = 900;
-    const t0 = performance.now();
-    const tick = (t: number) => {
-      const p = Math.min(1, (t - t0) / dur);
-      const eased = 1 - Math.pow(1 - p, 3);
-      el.textContent = String(Math.round(target * eased));
-      if (p < 1) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  };
-  const io = new IntersectionObserver(
-    (entries) => {
-      for (const en of entries) {
-        if (en.isIntersecting) {
-          run(en.target as HTMLElement);
-          io.unobserve(en.target);
-        }
-      }
-    },
-    { threshold: 0.5 },
-  );
-  els.forEach((el) => io.observe(el));
-  // fallback for webviews that never deliver IO callbacks
-  const sweep = () => {
-    for (const el of els) {
-      const r = el.getBoundingClientRect();
-      if (r.top < innerHeight * 0.9 && r.bottom > 0) run(el);
-    }
-  };
-  addEventListener('scroll', sweep, { passive: true });
-  requestAnimationFrame(sweep);
-})();
-
-/* ---------- BGM toggle ---------- */
-(function bgm() {
-  const audio = $('#bgm') as unknown as HTMLAudioElement;
-  const btn = $('#bgmToggle');
-  const KEY = 'hq-bgm';
-  const slash = btn.querySelector('.bgm-off') as SVGPathElement;
-  let on = localStorage.getItem(KEY) === '1';
-
-  const apply = () => {
-    btn.setAttribute('aria-pressed', String(on));
-    slash.style.display = on ? 'none' : '';
-  };
-
-  const start = () => {
-    audio.volume = 0.35;
-    audio.play().catch(() => {});
-  };
-
-  apply();
-  btn.addEventListener('click', () => {
-    on = !on;
-    localStorage.setItem(KEY, on ? '1' : '0');
-    apply();
-    if (on) start();
-    else audio.pause();
-  });
-
-  // resume preference on first user gesture (autoplay policy)
-  const resume = () => {
-    if (on) start();
-    document.removeEventListener('pointerdown', resume);
-  };
-  document.addEventListener('pointerdown', resume);
 })();
