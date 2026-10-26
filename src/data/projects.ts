@@ -1,6 +1,14 @@
 // 作品集数据 —— 极简模型：名称 + 一行类别 + 媒体 + 外链。
 // 想看细节的人会点进各项目站点，本站只负责好看。
 
+/** 项目宣传片 —— 热链各项目官网，那边更新这里自动同步 */
+export interface Promo {
+  sources: { src: string; type: string }[];
+  poster: string;
+  /** 视频宽高比，用于预留版面 */
+  aspect: string;
+}
+
 export interface Work {
   id: string;
   name: string;
@@ -14,8 +22,8 @@ export interface Work {
   icon: string;
   /** 在线站点 */
   url: string;
-  /** 主推项目：全宽视频大卡 */
-  featured?: boolean;
+  /** 有宣传片的项目用视频卡替换静态图 */
+  promo?: Promo;
 }
 
 export const works: Work[] = [
@@ -28,7 +36,14 @@ export const works: Work[] = [
     mediaAlt: '剑士游戏图标',
     icon: 'swordsman-icon.png',
     url: 'https://favoroo.github.io/Q-xiuxian/site/',
-    featured: true,
+    promo: {
+      sources: [
+        { src: 'https://favoroo.github.io/Q-xiuxian/site/video/promo.av1.mp4', type: 'video/mp4; codecs="av01"' },
+        { src: 'https://favoroo.github.io/Q-xiuxian/site/video/promo.mp4', type: 'video/mp4' },
+      ],
+      poster: 'https://favoroo.github.io/Q-xiuxian/site/img/shot_field.webp',
+      aspect: '16 / 9',
+    },
   },
   {
     id: 'dudu',
@@ -39,6 +54,11 @@ export const works: Work[] = [
     mediaAlt: '嘟嘟羽毛球游戏画面',
     icon: 'dudu-icon.png',
     url: 'https://favoroo.github.io/Dudu-Badminton/site/',
+    promo: {
+      sources: [{ src: 'https://favoroo.github.io/Dudu-Badminton/site/video/promo.mp4', type: 'video/mp4' }],
+      poster: 'https://favoroo.github.io/Dudu-Badminton/site/img/poster.webp',
+      aspect: '20 / 9',
+    },
   },
   {
     id: 'qnote',
@@ -61,15 +81,6 @@ export const works: Work[] = [
     url: 'https://favoroo.github.io/Qmenu/',
   },
 ];
-
-/** 剑士演示视频 —— 热链游戏官网，那边更新这里自动同步 */
-export const swordsmanVideo = {
-  sources: [
-    { src: 'https://favoroo.github.io/Q-xiuxian/site/video/promo.av1.mp4', type: 'video/mp4; codecs="av01"' },
-    { src: 'https://favoroo.github.io/Q-xiuxian/site/video/promo.mp4', type: 'video/mp4' },
-  ],
-  poster: 'https://favoroo.github.io/Q-xiuxian/site/img/shot_field.webp',
-};
 
 export const contact = {
   email: 'favoro@qq.com',

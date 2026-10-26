@@ -533,15 +533,16 @@ body[data-menu-open] {
   min-width: 0;
 }
 
-.work--featured {
+/* 剑士：全宽主推 */
+.work--swordsman {
   grid-column: 1 / -1;
 }
 
-/* ---------- 视频大卡 ---------- */
+/* ---------- 视频卡 ---------- */
 
 .work__video {
   position: relative;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: var(--video-aspect, 16 / 9);
   background: #000;
   border: 1px solid var(--line);
   overflow: hidden;
@@ -598,7 +599,7 @@ body[data-menu-open] {
   border-radius: 12px;
   transition: transform 500ms var(--ease);
 }
-.work--featured:hover .work__icon {
+.work:hover .work__icon {
   transform: scale(1.06);
 }
 .work__meta {
@@ -636,7 +637,7 @@ body[data-menu-open] {
   transform: translateX(6px);
 }
 
-/* ---------- 次级截图卡 + 紧凑图标卡 ---------- */
+/* ---------- 次席视频卡 + 紧凑图标栏 ---------- */
 
 .work--dudu {
   grid-column: span 7;
@@ -647,6 +648,14 @@ body[data-menu-open] {
   flex-direction: column;
   gap: clamp(20px, 2.5vw, 36px);
   min-width: 0;
+  /* 与左侧视频卡整行同高，两张图标卡平分 */
+  height: 100%;
+}
+
+/* 图标栏整体只占视频卡那一行的高度，两张卡平分 */
+.works__rail .card {
+  flex: 1 1 0;
+  min-height: 0;
 }
 
 .card {

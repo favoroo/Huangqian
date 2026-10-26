@@ -1,5 +1,5 @@
 import './styles/main.css';
-import { works, swordsmanVideo, type Work } from './data/projects';
+import { works, type Work } from './data/projects';
 import { DitherVeil } from './lib/DitherVeil';
 
 const base = import.meta.env.BASE_URL;
@@ -9,15 +9,17 @@ const $ = <T extends HTMLElement>(sel: string) => document.querySelector(sel) as
 
 /* ---------- 作品卡渲染 ---------- */
 
-function featuredHTML(w: Work): string {
-  const sources = swordsmanVideo.sources.map((s) => `<source src="${s.src}" type="${s.type}" />`).join('');
+/** 有宣传片的项目：封面 + 播放键，点开带声音播放 */
+function videoWorkHTML(w: Work, modClass = ''): string {
+  const promo = w.promo!;
+  const sources = promo.sources.map((s) => `<source src="${s.src}" type="${s.type}" />`).join('');
   return `
-  <article class="work work--featured reveal">
-    <div class="work__video" id="promoWrap">
-      <video id="promoVideo" preload="none" playsinline poster="${swordsmanVideo.poster}" aria-label="剑士游戏演示视频">
+  <article class="work ${modClass} reveal" data-work="${w.id}">
+    <div class="work__video" data-video-wrap style="--video-aspect: ${promo.aspect}">
+      <video preload="none" playsinline poster="${promo.poster}" aria-label="${w.name}演示视频">
         ${sources}
       </video>
-      <button class="work__play" id="promoPlay" aria-label="播放剑士演示视频">
+      <button class="work__play" data-video-play aria-label="播放${w.name}演示视频">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.8v16.4c0 .9 1 1.5 1.8 1L21.4 13a1.2 1.2 0 0 0 0-2L7.8 2.9C7 2.4 6 2.9 6 3.8z"/></svg>
       </button>
     </div>
@@ -30,19 +32,6 @@ function featuredHTML(w: Work): string {
       <a class="work__go" href="${w.url}" target="_blank" rel="noopener">访问站点 <span class="arrow" aria-hidden="true">→</span></a>
     </div>
   </article>`;
-}
-
-function cardHTML(w: Work, extraClass = ''): string {
-  return `
-  <a class="card reveal ${extraClass}" href="${w.url}" target="_blank" rel="noopener" aria-label="访问 ${w.name} 站点">
-    <div class="card__media"><img src="${imgRaw(w.media)}" alt="${w.mediaAlt}" loading="lazy" /></div>
-    <div class="card__body">
-      <img class="card__nameIcon" src="${imgRaw(w.icon)}" alt="" width="40" height="40" loading="lazy" />
-      <h3 class="card__name">${w.name}</h3>
-      <p class="card__line">${w.line}</p>
-      <span class="card__arrow" aria-hidden="true">→</span>
-    </div>
-  </a>`;
 }
 
 function compactHTML(w: Work): string {
@@ -59,43 +48,45 @@ function compactHTML(w: Work): string {
 
 (function renderWorks() {
   const grid = $('#worksGrid');
-  const [featured, dudu, ...rest] = works;
+  // 有宣传片的项目排成大卡，其余归入右侧图标栏
+  const promos = works.filter((w) => w.promo);
+  const rest = works.filter((w) => !w.promo);
   grid.innerHTML = `
-    ${featuredHTML(featured)}
-    ${cardHTML(dudu, 'work--dudu')}
+    ${promos.map((w) => videoWorkHTML(w, `work--${w.id}`)).join('')}
     <div class="works__rail">
       ${rest.map((w) => compactHTML(w)).join('')}
     </div>`;
 })();
 
-/* ---------- 剑士视频：点击播放（带声音），滚出暂停 ---------- */
+/* ---------- 宣传片：点击播放（带声音），滚出暂停 ---------- */
 
-(function promoVideo() {
-  const wrap = $('#promoWrap');
-  const video = document.querySelector('#promoVideo') as HTMLVideoElement;
-  const playBtn = $('#promoPlay') as HTMLButtonElement;
-  if (!wrap || !video || !playBtn) return;
+(function promoVideos() {
+  document.querySelectorAll<HTMLElement>('[data-video-wrap]').forEach((wrap) => {
+    const video = wrap.querySelector('video');
+    const playBtn = wrap.querySelector<HTMLButtonElement>('[data-video-play]');
+    if (!video || !playBtn) return;
 
-  playBtn.addEventListener('click', () => {
-    video.controls = true;
-    wrap.classList.add('is-playing');
-    void video.play();
+    playBtn.addEventListener('click', () => {
+      video.controls = true;
+      wrap.classList.add('is-playing');
+      void video.play();
+    });
+
+    // 播放结束：回到封面态
+    video.addEventListener('ended', () => {
+      video.controls = false;
+      wrap.classList.remove('is-playing');
+      video.load();
+    });
+
+    // 滚出视口自动暂停
+    new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting && !video.paused) video.pause();
+      },
+      { threshold: 0.1 },
+    ).observe(wrap);
   });
-
-  // 播放结束：回到封面态
-  video.addEventListener('ended', () => {
-    video.controls = false;
-    wrap.classList.remove('is-playing');
-    video.load();
-  });
-
-  // 滚出视口自动暂停
-  new IntersectionObserver(
-    ([entry]) => {
-      if (!entry.isIntersecting && !video.paused) video.pause();
-    },
-    { threshold: 0.1 },
-  ).observe(wrap);
 })();
 
 /* ---------- DitherVeil 首屏面纱 ---------- */
