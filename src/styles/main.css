@@ -528,7 +528,7 @@ body[data-menu-open] {
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: clamp(20px, 2.5vw, 36px);
   /* 整体收窄居中，视频不至于铺满版面 */
-  max-width: 980px;
+  max-width: 840px;
   margin-inline: auto;
 }
 
