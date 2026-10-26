@@ -183,7 +183,7 @@ function reelHTML(r: Reel, i: number): string {
     active = r;
     current = row.querySelector<HTMLElement>(`[data-reel="${id}"]`);
     current?.querySelector('video')?.pause();
-    title!.textContent = `${r.name} — ${r.line}`;
+    title!.textContent = r.name;
 
     // 单段窗口不显示切换标签，避免多余的 UI
     if (r.clips.length > 1) {

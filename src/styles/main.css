@@ -1226,10 +1226,10 @@ body[data-menu-open] {
   .reels__row {
     grid-template-columns: 1fr;
   }
-  .reel:first-child,
-  .reel:first-child .reel__frame {
+  /* 单列后首卡不再横跨两列；宽高比只能压在画面上，
+     压在整个按钮上会连底部文案一起裁掉 */
+  .reel:first-child {
     grid-column: auto;
-    aspect-ratio: 1918 / 952;
   }
   .reel__name {
     font-size: 16px;

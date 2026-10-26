@@ -123,8 +123,8 @@ export interface Reel {
 export const reels: Reel[] = [
   {
     id: 'evkit',
-    name: 'EVBOX 图片处理工具',
-    line: '零件图批量转线稿',
+    name: '图片批量处理工具',
+    line: '零件照片一键转线稿',
     clips: [
       {
         label: '批量转线稿',
@@ -136,11 +136,11 @@ export const reels: Reel[] = [
   },
   {
     id: 'docs',
-    name: '汽车技术部资料 Agent',
-    line: '维修手册问答，带出处',
+    name: '维修资料问答助手',
+    line: '维修问题直接问，答案带手册出处',
     clips: [
       {
-        label: '维修手册问答',
+        label: '手册问答',
         duration: '00:45',
         poster: 'career-docs-agent.webp',
         src: 'videos/docs-agent.mp4',
@@ -155,11 +155,11 @@ export const reels: Reel[] = [
   },
   {
     id: 'trans',
-    name: 'AUTEL 翻译 Agent 平台',
-    line: 'Excel 术语整改与翻译',
+    name: '文档批量翻译平台',
+    line: '术语表自动检查与翻译',
     clips: [
       {
-        label: '任务处理',
+        label: '批量翻译',
         duration: '01:50',
         poster: 'career-trans-agent.webp',
         src: 'videos/trans-agent.mp4',
