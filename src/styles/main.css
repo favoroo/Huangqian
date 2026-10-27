@@ -703,6 +703,11 @@ body[data-menu-open] {
   color: var(--dim);
   line-height: 1.4;
 }
+.reel__line strong {
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: 0.02em;
+}
 
 /* ---------- 录屏弹窗 ---------- */
 
@@ -930,14 +935,14 @@ body[data-menu-open] {
   margin-inline: auto;
 }
 
-/* ---------- 游戏宣传窗口：两扇并排，与录屏窗口共用弹窗 ---------- */
+/* ---------- 游戏宣传窗口：两扇并排，收窄居中保持小巧清晰 ---------- */
 
 .games__row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(20px, 2.5vw, 36px);
-  /* 与「游戏」分组细线对齐（容器内全宽），比应用段更宽以突出画面 */
-  max-width: none;
+  gap: clamp(18px, 2.2vw, 28px);
+  /* 限制最大宽度并居中，窗口紧凑小巧，预览不拉扯模糊 */
+  max-width: 820px;
   margin-inline: auto;
 }
 

@@ -50,7 +50,7 @@ function reelHTML(r: Reel, i: number, { reveal = true }: { reveal?: boolean } = 
       <span class="reel__time">${first.duration}</span>
     </span>
     <span class="reel__frame">
-      <video muted loop playsinline preload="none" data-preview="${mediaURL(first.src)}" aria-hidden="true"></video>
+      <video muted loop playsinline preload="none" data-preview="${mediaURL(first.previewSrc ?? first.src)}" aria-hidden="true"></video>
       <img class="reel__poster" src="${mediaURL(first.poster.startsWith('http') ? first.poster : `img/${first.poster}`)}" alt="" loading="lazy" decoding="async" />
       <span class="reel__play" aria-hidden="true">
         <svg viewBox="0 0 24 24"><path d="M6 3.8v16.4c0 .9 1 1.5 1.8 1L21.4 13a1.2 1.2 0 0 0 0-2L7.8 2.9C7 2.4 6 2.9 6 3.8z"/></svg>
@@ -94,23 +94,84 @@ function gameHTML(g: GameReel, i: number): string {
     reels.find((x) => x.id === id) ?? games.find((x) => x.id === id);
 
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // 触摸设备没有 hover，没必要预下载
+  const canHover = matchMedia('(hover: hover) and (pointer: fine)').matches;
 
-  // 悬停静音预览：首次悬停才加载，移开暂停并退回封面
-  if (!reduced) {
+  // 悬停静音预览：用独立的轻量微视频（每秒几 KB、20~60KB 全片），与弹窗里的完整原画分开。
+  // 要点：
+  // 1. 卡片进入视口就把整段微视频拉完（preload="auto"），悬停时几乎是本地文件，不再出现卡顿；
+  // 2. 悬停防抖 80ms：鼠标快速划过整排卡不触发播放；
+  // 3. 只在 playing 事件（真正解出画面）后才淡出封面，加载期绝不露黑；
+  // 4. 移开即暂停并回到第 0 帧，下次悬停立刻可播。
+  if (!reduced && canHover) {
+    const cards: HTMLElement[] = [];
     [careerRow, gamesRow].forEach((row) => {
       row.querySelectorAll<HTMLElement>('.reel').forEach((card) => {
-        const v = card.querySelector('video');
-        if (!v) return;
-        card.addEventListener('pointerenter', (e) => {
-          if (e.pointerType !== 'mouse') return;
-          if (!v.src) v.src = v.dataset.preview!;
+        cards.push(card);
+      });
+    });
+
+    // 视口预取：微视频很小，直接下完整片
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(
+        (entries, obs) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const card = entry.target as HTMLElement;
+              const v = card.querySelector('video');
+              if (v && !v.src && v.dataset.preview) {
+                v.preload = 'auto';
+                v.src = v.dataset.preview;
+                v.load();
+              }
+              obs.unobserve(card);
+            }
+          });
+        },
+        { rootMargin: '200px 0px' },
+      );
+      cards.forEach((c) => observer.observe(c));
+    }
+
+    cards.forEach((card) => {
+      const v = card.querySelector('video');
+      if (!v) return;
+
+      let hoverTimer: number | null = null;
+      let isHovered = false;
+
+      // 只有真正起播并输出帧时才切走封面
+      v.addEventListener('playing', () => {
+        if (isHovered) card.classList.add('is-previewing');
+      });
+      // 缓冲中（极少出现）也不露黑：封面留着
+      v.addEventListener('waiting', () => card.classList.remove('is-previewing'));
+
+      card.addEventListener('pointerenter', (e) => {
+        if (e.pointerType !== 'mouse') return;
+        isHovered = true;
+
+        hoverTimer = window.setTimeout(() => {
+          if (!isHovered) return;
+          if (!v.src && v.dataset.preview) {
+            v.preload = 'auto';
+            v.src = v.dataset.preview;
+            v.load();
+          }
           void v.play().catch(() => {});
-          card.classList.add('is-previewing');
-        });
-        card.addEventListener('pointerleave', () => {
-          v.pause();
-          card.classList.remove('is-previewing');
-        });
+        }, 80);
+      });
+
+      card.addEventListener('pointerleave', () => {
+        isHovered = false;
+        if (hoverTimer) {
+          clearTimeout(hoverTimer);
+          hoverTimer = null;
+        }
+        v.pause();
+        // 回到片头，下次悬停从第一帧开始，也避免停在黑场帧
+        v.currentTime = 0;
+        card.classList.remove('is-previewing');
       });
     });
   }
@@ -128,12 +189,20 @@ function gameHTML(g: GameReel, i: number): string {
       t.setAttribute('aria-current', i === index ? 'true' : 'false');
     });
     video.poster = mediaURL(clip.poster.startsWith('http') ? clip.poster : `img/${clip.poster}`);
+    // 弹窗是用户主动点击触发（已有用户手势交互），默认开启声音
+    video.muted = false;
     // 先让浏览器把媒体拉起来再播：readyState 不足时直接 play() 会被省电策略中断（AbortError）
     video.src = mediaURL(clip.src);
     video.load();
     // 舞台按本段视频的宽高比自适应（录屏 2:1，游戏宣传片 16:9 / 20:9）
     stage?.style.setProperty('--lb-aspect', clip.aspect ?? '');
-    const start = () => void video.play().catch(() => {});
+    const start = () => {
+      video.play().catch(() => {
+        // 如果被某些严格策略阻止带声起播，降级为静音重试，保证视频能正常播
+        video.muted = true;
+        void video.play().catch(() => {});
+      });
+    };
     if (video.readyState >= 3) start();
     else video.addEventListener('canplay', start, { once: true });
   };
