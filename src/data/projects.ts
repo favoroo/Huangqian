@@ -1,20 +1,10 @@
 // 作品集数据 —— 极简模型：名称 + 一行类别 + 媒体 + 外链。
 // 想看细节的人会点进各项目站点，本站只负责好看。
 
-/** 项目宣传片 —— 热链各项目官网，那边更新这里自动同步 */
-export interface Promo {
-  sources: { src: string; type: string }[];
-  poster: string;
-  /** 视频宽高比，用于预留版面 */
-  aspect: string;
-}
-
 export interface Work {
   id: string;
   name: string;
   nameEn: string;
-  /** 分组：游戏 / 应用 */
-  kind: 'game' | 'app';
   /** 一句话类别说明 */
   line: string;
   /** 图标或截图（public/img 下的文件名，含扩展名） */
@@ -24,51 +14,14 @@ export interface Work {
   icon: string;
   /** 在线站点 */
   url: string;
-  /** 有宣传片的项目用视频卡替换静态图 */
-  promo?: Promo;
 }
 
+/** 应用作品；游戏宣传窗口单独放在 games */
 export const works: Work[] = [
-  {
-    id: 'swordsman',
-    name: '剑士',
-    nameEn: 'SWORDSMAN',
-    kind: 'game',
-    line: 'Godot 动作肉鸽游戏',
-    media: 'swordsman-icon.png',
-    mediaAlt: '剑士游戏图标',
-    icon: 'swordsman-icon.png',
-    url: 'https://favoroo.github.io/Q-xiuxian/site/',
-    promo: {
-      sources: [
-        { src: 'https://favoroo.github.io/Q-xiuxian/site/video/promo.av1.mp4', type: 'video/mp4; codecs="av01"' },
-        { src: 'https://favoroo.github.io/Q-xiuxian/site/video/promo.mp4', type: 'video/mp4' },
-      ],
-      poster: 'https://favoroo.github.io/Q-xiuxian/site/img/shot_field.webp',
-      aspect: '16 / 9',
-    },
-  },
-  {
-    id: 'dudu',
-    name: '嘟嘟羽毛球',
-    nameEn: 'DUDU BADMINTON',
-    kind: 'game',
-    line: 'Cocos 休闲竞技游戏',
-    media: 'dudu-arena.webp',
-    mediaAlt: '嘟嘟羽毛球游戏画面',
-    icon: 'dudu-icon.png',
-    url: 'https://favoroo.github.io/Dudu-Badminton/site/',
-    promo: {
-      sources: [{ src: 'https://favoroo.github.io/Dudu-Badminton/site/video/promo.mp4', type: 'video/mp4' }],
-      poster: 'https://favoroo.github.io/Dudu-Badminton/site/img/poster.webp',
-      aspect: '20 / 9',
-    },
-  },
   {
     id: 'qnote',
     name: 'QNote',
     nameEn: 'QNOTE',
-    kind: 'app',
     line: 'Flutter 笔记应用',
     media: 'qnote-icon.png',
     mediaAlt: 'QNote 应用图标',
@@ -79,7 +32,6 @@ export const works: Work[] = [
     id: 'qmenu',
     name: 'Q 菜单',
     nameEn: 'QMENU',
-    kind: 'app',
     line: '微信小程序',
     media: 'qmenu-logo.svg',
     mediaAlt: 'Q 菜单 logo',
@@ -90,12 +42,11 @@ export const works: Work[] = [
     id: 'qian-ppt',
     name: 'Qian-PPT',
     nameEn: 'QIAN-PPT',
-    kind: 'app',
     line: '智能幻灯片编辑器',
     media: 'qian-ppt-icon.svg',
     mediaAlt: 'Qian-PPT 图标',
     icon: 'qian-ppt-icon.svg',
-    url: 'https://github.com/favoroo/qian-ppt',
+    url: 'https://favoroo.github.io/qian-ppt/',
   },
 ];
 
@@ -105,9 +56,11 @@ export interface ReelClip {
   label: string;
   /** 时长，显示在窗口标题栏 */
   duration: string;
-  /** 封面帧（public/img 下的文件名） */
+  /** 弹窗舞台宽高比；缺省按录屏画面 1918 / 952 */
+  aspect?: string;
+  /** 封面帧：public/img 下的文件名，或外部完整 URL */
   poster: string;
-  /** 本地 H.264 副本（public 下的相对路径），避免 HEVC 在 Chrome 里放不了 */
+  /** public 下的相对路径（本地 H.264 副本），或外部完整 URL */
   src: string;
 }
 
@@ -163,6 +116,45 @@ export const reels: Reel[] = [
         duration: '01:50',
         poster: 'career-trans-agent.webp',
         src: 'videos/trans-agent.mp4',
+      },
+    ],
+  },
+];
+
+/** 游戏宣传窗口 —— 与录屏窗口共用一套弹窗播放；视频热链各项目官网，那边更新这里自动同步 */
+export interface GameReel extends Reel {
+  /** 游戏官网 */
+  url: string;
+}
+
+export const games: GameReel[] = [
+  {
+    id: 'swordsman',
+    name: '剑士',
+    line: 'Godot 动作肉鸽游戏',
+    url: 'https://favoroo.github.io/Q-xiuxian/site/',
+    clips: [
+      {
+        label: '宣传片',
+        duration: '00:59',
+        aspect: '16 / 9',
+        poster: 'https://favoroo.github.io/Q-xiuxian/site/img/shot_field.webp',
+        src: 'https://favoroo.github.io/Q-xiuxian/site/video/promo.mp4',
+      },
+    ],
+  },
+  {
+    id: 'dudu',
+    name: '嘟嘟羽毛球',
+    line: 'Cocos 休闲竞技游戏',
+    url: 'https://favoroo.github.io/Dudu-Badminton/site/',
+    clips: [
+      {
+        label: '宣传片',
+        duration: '00:16',
+        aspect: '20 / 9',
+        poster: 'https://favoroo.github.io/Dudu-Badminton/site/img/poster.webp',
+        src: 'https://favoroo.github.io/Dudu-Badminton/site/video/promo.mp4',
       },
     ],
   },

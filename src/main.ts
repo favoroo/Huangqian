@@ -1,5 +1,5 @@
 import './styles/main.css';
-import { works, reels, type Work, type Reel } from './data/projects';
+import { works, reels, games, type Work, type Reel, type GameReel } from './data/projects';
 import { DitherVeil } from './lib/DitherVeil';
 
 const base = import.meta.env.BASE_URL;
@@ -7,32 +7,10 @@ const imgRaw = (name: string) => `${base}img/${name}`;
 
 const $ = <T extends HTMLElement>(sel: string) => document.querySelector(sel) as T;
 
-/* ---------- 作品卡渲染 ---------- */
+/** 数据里的媒体地址：外部完整 URL 原样用，其余按 public 下相对路径拼 */
+const mediaURL = (u: string) => (u.startsWith('http') ? u : `${base}${u}`);
 
-/** 有宣传片的项目：封面 + 播放键，点开带声音播放 */
-function videoWorkHTML(w: Work, modClass = ''): string {
-  const promo = w.promo!;
-  const sources = promo.sources.map((s) => `<source src="${s.src}" type="${s.type}" />`).join('');
-  return `
-  <article class="work ${modClass} reveal" data-work="${w.id}">
-    <div class="work__video" data-video-wrap style="--video-aspect: ${promo.aspect}">
-      <video preload="none" playsinline poster="${promo.poster}" aria-label="${w.name}演示视频">
-        ${sources}
-      </video>
-      <button class="work__play" data-video-play aria-label="播放${w.name}演示视频">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.8v16.4c0 .9 1 1.5 1.8 1L21.4 13a1.2 1.2 0 0 0 0-2L7.8 2.9C7 2.4 6 2.9 6 3.8z"/></svg>
-      </button>
-    </div>
-    <div class="work__caption">
-      <img class="work__icon" src="${imgRaw(w.icon)}" alt="" width="56" height="56" />
-      <div class="work__meta">
-        <h3 class="work__name">${w.name}</h3>
-        <p class="work__line">${w.line}</p>
-      </div>
-      <a class="work__go" href="${w.url}" target="_blank" rel="noopener">访问站点 <span class="arrow" aria-hidden="true">→</span></a>
-    </div>
-  </article>`;
-}
+/* ---------- 作品卡渲染 ---------- */
 
 function compactHTML(w: Work): string {
   return `
@@ -48,71 +26,31 @@ function compactHTML(w: Work): string {
 
 (function renderWorks() {
   const grid = $('#worksGrid');
-  // 按「游戏 / 应用」分成两段，各自内部保持原有的大卡 / 紧凑卡排布
-  const groups: { kind: Work['kind']; label: string }[] = [
-    { kind: 'game', label: '游戏' },
-    { kind: 'app', label: '应用' },
-  ];
-  grid.innerHTML = groups
-    .map(({ kind, label }) => {
-      const items = works.filter((w) => w.kind === kind);
-      if (!items.length) return '';
-      return `
-    <div class="works__group works__group--${kind}">
-      <p class="works__label reveal">${label}</p>
-      <div class="works__items">
-        ${items.map((w) => (w.promo ? videoWorkHTML(w, `work--${w.id}`) : compactHTML(w))).join('')}
-      </div>
+  // 游戏用小宣传窗并排（点开弹窗播放），应用保持紧凑卡一行
+  grid.innerHTML = `
+    <div class="works__group works__group--game">
+      <p class="works__label reveal">游戏</p>
+      <div class="games__row" id="gamesRow">${games.map((g, i) => gameHTML(g, i)).join('')}</div>
+    </div>
+    <div class="works__group works__group--app">
+      <p class="works__label reveal">应用</p>
+      <div class="works__items">${works.map((w) => compactHTML(w)).join('')}</div>
     </div>`;
-    })
-    .join('');
-})();
-
-/* ---------- 宣传片：点击播放（带声音），滚出暂停 ---------- */
-
-(function promoVideos() {
-  document.querySelectorAll<HTMLElement>('[data-video-wrap]').forEach((wrap) => {
-    const video = wrap.querySelector('video');
-    const playBtn = wrap.querySelector<HTMLButtonElement>('[data-video-play]');
-    if (!video || !playBtn) return;
-
-    playBtn.addEventListener('click', () => {
-      video.controls = true;
-      wrap.classList.add('is-playing');
-      void video.play();
-    });
-
-    // 播放结束：回到封面态
-    video.addEventListener('ended', () => {
-      video.controls = false;
-      wrap.classList.remove('is-playing');
-      video.load();
-    });
-
-    // 滚出视口自动暂停
-    new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting && !video.paused) video.pause();
-      },
-      { threshold: 0.1 },
-    ).observe(wrap);
-  });
 })();
 
 /* ---------- 职业经历：录屏窗口 + 弹窗播放 ---------- */
 
-function reelHTML(r: Reel, i: number): string {
+function reelHTML(r: Reel, i: number, { reveal = true }: { reveal?: boolean } = {}): string {
   const first = r.clips[0];
-  const poster = `${base}img/${first.poster}`;
   return `
-  <button class="reel reveal" style="--rd:${120 + i * 90}ms" data-reel="${r.id}" aria-label="播放「${r.name}」录屏">
+  <button class="reel${reveal ? ' reveal' : ''}"${reveal ? ` style="--rd:${120 + i * 90}ms"` : ''} data-reel="${r.id}" aria-label="播放「${r.name}」视频">
     <span class="reel__chrome">
       <span class="reel__dots" aria-hidden="true"><i></i><i></i><i></i></span>
       <span class="reel__time">${first.duration}</span>
     </span>
     <span class="reel__frame">
-      <video muted loop playsinline preload="none" data-preview="${base}${first.src}" aria-hidden="true"></video>
-      <img class="reel__poster" src="${poster}" alt="" loading="lazy" decoding="async" />
+      <video muted loop playsinline preload="none" data-preview="${mediaURL(first.src)}" aria-hidden="true"></video>
+      <img class="reel__poster" src="${mediaURL(first.poster.startsWith('http') ? first.poster : `img/${first.poster}`)}" alt="" loading="lazy" decoding="async" />
       <span class="reel__play" aria-hidden="true">
         <svg viewBox="0 0 24 24"><path d="M6 3.8v16.4c0 .9 1 1.5 1.8 1L21.4 13a1.2 1.2 0 0 0 0-2L7.8 2.9C7 2.4 6 2.9 6 3.8z"/></svg>
       </span>
@@ -124,34 +62,51 @@ function reelHTML(r: Reel, i: number): string {
   </button>`;
 }
 
-(function careerReels() {
-  const row = $('#reelsRow');
+/** 游戏宣传窗：复用录屏卡外观；站点链接放卡外，button 里不能嵌链接 */
+function gameHTML(g: GameReel, i: number): string {
+  return `
+  <div class="gamework reveal" style="--rd:${120 + i * 110}ms">
+    ${reelHTML(g, i, { reveal: false })}
+    <a class="gamework__site" href="${g.url}" target="_blank" rel="noopener">访问站点 <span class="arrow" aria-hidden="true">→</span></a>
+  </div>`;
+}
+
+(function reelLightbox() {
+  const careerRow = $('#reelsRow');
+  const gamesRow = $('#gamesRow');
   const dialog = $('#lightbox') as HTMLDialogElement;
   const video = $('#lightboxVideo') as HTMLVideoElement;
+  const stage = $('#lightboxStage');
   const title = $('#lightboxTitle');
   const tabs = $('#lightboxTabs');
   const closeBtn = $('#lightboxClose') as HTMLButtonElement;
-  if (!row) return;
+  if (!careerRow || !gamesRow) return;
 
-  row.innerHTML = reels.map(reelHTML).join('');
+  careerRow.innerHTML = reels.map((r, i) => reelHTML(r, i)).join('');
+  gamesRow.innerHTML = games.map((g, i) => gameHTML(g, i)).join('');
   if (!dialog || !video || !tabs) return;
+
+  const findReel = (id: string) =>
+    reels.find((x) => x.id === id) ?? games.find((x) => x.id === id);
 
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // 悬停静音预览：首次悬停才加载，移开暂停并退回封面
   if (!reduced) {
-    row.querySelectorAll<HTMLElement>('.reel').forEach((card) => {
-      const v = card.querySelector('video');
-      if (!v) return;
-      card.addEventListener('pointerenter', (e) => {
-        if (e.pointerType !== 'mouse') return;
-        if (!v.src) v.src = v.dataset.preview!;
-        void v.play().catch(() => {});
-        card.classList.add('is-previewing');
-      });
-      card.addEventListener('pointerleave', () => {
-        v.pause();
-        card.classList.remove('is-previewing');
+    [careerRow, gamesRow].forEach((row) => {
+      row.querySelectorAll<HTMLElement>('.reel').forEach((card) => {
+        const v = card.querySelector('video');
+        if (!v) return;
+        card.addEventListener('pointerenter', (e) => {
+          if (e.pointerType !== 'mouse') return;
+          if (!v.src) v.src = v.dataset.preview!;
+          void v.play().catch(() => {});
+          card.classList.add('is-previewing');
+        });
+        card.addEventListener('pointerleave', () => {
+          v.pause();
+          card.classList.remove('is-previewing');
+        });
       });
     });
   }
@@ -168,20 +123,22 @@ function reelHTML(r: Reel, i: number): string {
       t.classList.toggle('is-active', i === index);
       t.setAttribute('aria-current', i === index ? 'true' : 'false');
     });
-    video.poster = `${base}img/${clip.poster}`;
+    video.poster = mediaURL(clip.poster.startsWith('http') ? clip.poster : `img/${clip.poster}`);
     // 先让浏览器把媒体拉起来再播：readyState 不足时直接 play() 会被省电策略中断（AbortError）
-    video.src = `${base}${clip.src}`;
+    video.src = mediaURL(clip.src);
     video.load();
+    // 舞台按本段视频的宽高比自适应（录屏 2:1，游戏宣传片 16:9 / 20:9）
+    stage?.style.setProperty('--lb-aspect', clip.aspect ?? '');
     const start = () => void video.play().catch(() => {});
     if (video.readyState >= 3) start();
     else video.addEventListener('canplay', start, { once: true });
   };
 
   const open = (id: string) => {
-    const r = reels.find((x) => x.id === id);
+    const r = findReel(id);
     if (!r) return;
     active = r;
-    current = row.querySelector<HTMLElement>(`[data-reel="${id}"]`);
+    current = document.querySelector<HTMLElement>(`[data-reel="${id}"]`);
     current?.querySelector('video')?.pause();
     title!.textContent = r.name;
 
@@ -219,9 +176,11 @@ function reelHTML(r: Reel, i: number): string {
     current?.focus();
   };
 
-  row.addEventListener('click', (e) => {
-    const card = (e.target as HTMLElement).closest<HTMLElement>('[data-reel]');
-    if (card) open(card.dataset.reel!);
+  [careerRow, gamesRow].forEach((row) => {
+    row.addEventListener('click', (e) => {
+      const card = (e.target as HTMLElement).closest<HTMLElement>('[data-reel]');
+      if (card) open(card.dataset.reel!);
+    });
   });
 
   closeBtn?.addEventListener('click', close);

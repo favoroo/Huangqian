@@ -772,8 +772,9 @@ body[data-menu-open] {
 .lightbox__stage {
   display: block;
   background: #000;
-  aspect-ratio: 1918 / 952;
-  max-height: calc(92vh - var(--lb-head));
+  /* 播放分段时由 JS 按视频宽高比覆写（--lb-aspect），缺省按录屏 2:1 */
+  aspect-ratio: var(--lb-aspect, 1918 / 952);
+  max-height: calc(92vh - 61px);
 }
 .lightbox__stage video {
   width: 100%;
@@ -868,122 +869,47 @@ body[data-menu-open] {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: clamp(20px, 2.5vw, 36px);
-  /* 视频段收窄居中，视频不至于铺满版面 */
-  max-width: 700px;
+  max-width: 900px;
   margin-inline: auto;
 }
 
-/* 应用段没有视频，比视频段宽一些但不铺满 */
-.works__group--app .works__items {
-  max-width: 900px;
-}
+/* ---------- 游戏宣传窗口：两扇并排，与录屏窗口共用弹窗 ---------- */
 
-.work {
-  min-width: 0;
-}
-
-/* 两个游戏各自占满整行，视频是这一段的主角 */
-.work--swordsman,
-.work--dudu {
-  grid-column: 1 / -1;
-}
-
-/* ---------- 视频卡 ---------- */
-
-.work__video {
-  position: relative;
-  aspect-ratio: var(--video-aspect, 16 / 9);
-  background: #000;
-  border: 1px solid var(--line);
-  overflow: hidden;
-}
-.work__video video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.work__play {
-  position: absolute;
-  inset: 0;
-  margin: auto;
-  width: clamp(72px, 8vw, 96px);
-  height: clamp(72px, 8vw, 96px);
-  border-radius: 50%;
-  background: var(--red);
+.games__row {
   display: grid;
-  place-items: center;
-  transition:
-    transform var(--dur) var(--ease),
-    background-color var(--dur) var(--ease),
-    opacity 300ms var(--ease);
-}
-.work__play svg {
-  width: 34%;
-  margin-left: 6%;
-  fill: var(--ink);
-}
-.work__play:hover {
-  transform: scale(1.08);
-  background: #f04036;
-}
-.work__play[hidden] {
-  display: none;
-}
-.work__video.is-playing .work__play {
-  opacity: 0;
-  pointer-events: none;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(20px, 2.5vw, 36px);
+  max-width: 900px;
+  margin-inline: auto;
 }
 
-.work__caption {
-  display: flex;
-  align-items: center;
-  gap: clamp(14px, 1.8vw, 22px);
-  padding-top: 18px;
-  flex-wrap: wrap;
-}
-.work__icon {
-  width: clamp(44px, 4vw, 56px);
-  height: clamp(44px, 4vw, 56px);
-  flex: none;
-  border-radius: 12px;
-  transition: transform 500ms var(--ease);
-}
-.work:hover .work__icon {
-  transform: scale(1.06);
-}
-.work__meta {
-  display: flex;
-  align-items: baseline;
-  gap: clamp(12px, 1.6vw, 22px);
-  flex-wrap: wrap;
+.gamework {
   min-width: 0;
 }
-.work__name {
-  font-family: var(--serif);
-  font-weight: 700;
-  font-size: clamp(30px, 3.6vw, 46px);
-  line-height: 1.2;
+
+/* 宣传片是 16:9 / 20:9，统一压进 16:9 画面框，两扇窗口齐平 */
+.games__row .reel__frame {
+  aspect-ratio: 16 / 9;
 }
-.work__line {
+
+.gamework__site {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 13px;
+  letter-spacing: 0.06em;
   color: var(--dim);
-  font-size: 15px;
-}
-.work__go {
-  margin-left: auto;
-  font-size: 14px;
-  color: var(--dim);
-  white-space: nowrap;
   transition: color var(--dur) var(--ease);
 }
-.work__go .arrow {
+.gamework__site .arrow {
   display: inline-block;
   transition: transform var(--dur) var(--ease);
 }
-.work__go:hover {
+.gamework__site:hover {
   color: var(--red);
 }
-.work__go:hover .arrow {
+.gamework__site:hover .arrow {
   transform: translateX(6px);
 }
 
@@ -1179,9 +1105,13 @@ body[data-menu-open] {
     order: 2;
   }
 
-  .work--dudu,
   .works__items .card--compact {
     grid-column: 1 / -1;
+  }
+
+  /* 游戏宣传窗在中等宽度下也保持并排，窄到单列时再堆叠 */
+  .games__row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   /* 三扇窗口在中等宽度下排成 2 + 1，避免每个窗口窄到看不清界面 */
@@ -1205,16 +1135,6 @@ body[data-menu-open] {
     gap: 18px;
   }
 
-  .work__caption {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-  }
-  .work__go {
-    margin-left: 0;
-    padding: 8px 0;
-  }
-
   /* 窄屏：说明独占一行，箭头靠右让位，避免换行后拥挤 */
   .card__body {
     flex-wrap: wrap;
@@ -1230,6 +1150,10 @@ body[data-menu-open] {
      压在整个按钮上会连底部文案一起裁掉 */
   .reel:first-child {
     grid-column: auto;
+  }
+  /* 游戏宣传窗同样回到单列 */
+  .games__row {
+    grid-template-columns: 1fr;
   }
   .reel__name {
     font-size: 16px;
@@ -1315,7 +1239,6 @@ body[data-menu-open] {
   .card__arrow,
   .contact__link,
   .contact__link .arrow,
-  .work__play,
   .reel__poster,
   .reel__play,
   .reel__dots i {
