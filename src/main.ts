@@ -158,7 +158,10 @@ function gameHTML(g: GameReel, i: number): string {
       dialog.classList.remove('has-tabs');
     }
 
-    dialog.showModal();
+    // 关闭动画进行中再次点开：取消收尾，直接原地换片
+    closeSeq++;
+    dialog.classList.remove('is-closing');
+    if (!dialog.open) dialog.showModal();
     playClip(0);
   };
 
@@ -169,11 +172,36 @@ function gameHTML(g: GameReel, i: number): string {
     video.load();
   };
 
+  // 关闭走一段快速淡出，动画结束后才真正 close()
+  let closeSeq = 0;
+
   const close = () => {
     if (!dialog.open) return;
-    dialog.close();
-    cleanup();
     current?.focus();
+    if (reduced) {
+      dialog.close();
+      cleanup();
+      return;
+    }
+    if (dialog.classList.contains('is-closing')) return;
+    video.pause();
+    dialog.classList.add('is-closing');
+    const seq = ++closeSeq;
+    const finish = () => {
+      if (seq !== closeSeq) return; // 已被重新打开取消
+      dialog.classList.remove('is-closing');
+      if (dialog.open) dialog.close();
+      cleanup();
+    };
+    const onEnd = (e: AnimationEvent) => {
+      if (e.target === dialog) finish();
+    };
+    dialog.addEventListener('animationend', onEnd, { once: true });
+    // 个别内嵌内核不派发 animationend，兜底定时器收口
+    setTimeout(() => {
+      dialog.removeEventListener('animationend', onEnd);
+      finish();
+    }, 280);
   };
 
   [careerRow, gamesRow].forEach((row) => {

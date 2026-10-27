@@ -710,20 +710,60 @@ body[data-menu-open] {
   background: rgba(0, 0, 0, 0.84);
   backdrop-filter: blur(6px);
 }
+/* ---------- 弹窗进出场编排 ----------
+   整窗：expo-out 曲线上浮缩放；标题栏与画面轻微错峰跟进；
+   关闭走 190ms 快速淡出（JS 在动画结束后才真正 close）。 */
+
 .lightbox[open] {
-  animation: lightbox-in 320ms var(--ease);
+  animation: lightbox-in 400ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 .lightbox[open]::backdrop {
-  animation: backdrop-in 320ms var(--ease);
+  animation: backdrop-in 280ms var(--ease) both;
+}
+.lightbox[open] .lightbox__bar,
+.lightbox[open] .lightbox__tabs {
+  animation: lb-head-in 360ms cubic-bezier(0.16, 1, 0.3, 1) 90ms both;
+}
+.lightbox[open] .lightbox__stage {
+  animation: lb-stage-in 420ms cubic-bezier(0.16, 1, 0.3, 1) 40ms both;
 }
 @keyframes lightbox-in {
   from {
     opacity: 0;
-    transform: scale(0.97) translateY(10px);
+    transform: scale(0.96) translateY(18px);
+  }
+}
+@keyframes lb-head-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+@keyframes lb-stage-in {
+  from {
+    opacity: 0;
   }
 }
 @keyframes backdrop-in {
   from {
+    opacity: 0;
+  }
+}
+
+.lightbox.is-closing {
+  animation: lightbox-out 190ms cubic-bezier(0.55, 0, 1, 0.45) both;
+}
+.lightbox.is-closing::backdrop {
+  animation: backdrop-out 190ms ease both;
+}
+@keyframes lightbox-out {
+  to {
+    opacity: 0;
+    transform: scale(0.97) translateY(10px);
+  }
+}
+@keyframes backdrop-out {
+  to {
     opacity: 0;
   }
 }
@@ -1245,7 +1285,10 @@ body[data-menu-open] {
     transition: none;
   }
   .lightbox[open],
-  .lightbox[open]::backdrop {
+  .lightbox[open]::backdrop,
+  .lightbox[open] .lightbox__bar,
+  .lightbox[open] .lightbox__tabs,
+  .lightbox[open] .lightbox__stage {
     animation: none;
   }
 }
