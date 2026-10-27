@@ -1,6 +1,7 @@
 import './styles/main.css';
 import { works, reels, games, type Work, type Reel, type GameReel } from './data/projects';
 import { DitherVeil } from './lib/DitherVeil';
+import { TechText } from './lib/TechText';
 
 const base = import.meta.env.BASE_URL;
 const imgRaw = (name: string) => `${base}img/${name}`;
@@ -236,6 +237,30 @@ function gameHTML(g: GameReel, i: number): string {
       e.preventDefault();
       close();
     }
+  });
+})();
+
+/* ---------- 联系标题：TechText 工程图纸特效 ---------- */
+
+(function contactTechText() {
+  const host = $('#contactTech');
+  if (!host) return;
+  new TechText(host, {
+    text: '欢迎联系。',
+    fontWeight: 700,
+    fontSize: 150,
+    letterSpacing: 0,
+    align: 'left',
+    // 与 --red 一致（Canvas 读不到 CSS 变量）
+    accentColor: '#e0342b',
+    reveal: 'letter',
+    dashLength: 4,
+    dashGap: 2,
+    specks: 15,
+    intro: 'none',
+    introDuration: 2,
+    clickKick: true,
+    guides: false,
   });
 })();
 

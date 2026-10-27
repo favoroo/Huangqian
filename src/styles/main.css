@@ -1105,6 +1105,29 @@ body[data-menu-open] {
   margin-bottom: clamp(40px, 7vh, 80px);
 }
 
+/* 联系标题：Canvas 绘制的 TechText 特效（悬停/点击/拖拽字母）
+   用 .contact__big 提权，盖住后面 .tech-text 的 100% 尺寸 */
+.contact__big .contact__tech {
+  display: block;
+  height: clamp(90px, 15vw, 185px);
+  /* 抵消 TechText 内置的 20px 框线与噪点预留，
+     让「欢迎联系。」首字墨迹与下方联系链接严格对齐 */
+  margin-left: -20px;
+  width: calc(100% + 40px);
+}
+.tech-text {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  touch-action: pan-y;
+  user-select: none;
+}
+.tech-text-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .contact__links {
   border-top: 1px solid var(--line);
 }
