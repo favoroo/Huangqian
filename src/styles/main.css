@@ -672,9 +672,26 @@ body[data-menu-open] {
 .reel__caption {
   display: flex;
   flex-direction: column;
-  gap: 3px;
   padding: 12px clamp(12px, 1.2vw, 16px) clamp(14px, 1.4vw, 18px);
   min-width: 0;
+}
+.reel__caption__main {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+/* 游戏宣传窗：名称旁带小图标 */
+.reel__caption--icon {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+.reel__icon {
+  width: clamp(36px, 3.4vw, 44px);
+  height: clamp(36px, 3.4vw, 44px);
+  flex: none;
+  border-radius: 10px;
 }
 .reel__name {
   font-family: var(--serif);
@@ -919,7 +936,8 @@ body[data-menu-open] {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: clamp(20px, 2.5vw, 36px);
-  max-width: 900px;
+  /* 与「游戏」分组细线对齐（容器内全宽），比应用段更宽以突出画面 */
+  max-width: none;
   margin-inline: auto;
 }
 

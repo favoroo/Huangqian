@@ -69,6 +69,8 @@ export interface Reel {
   name: string;
   /** 一句话说明 */
   line: string;
+  /** 名称旁的小图标（public/img 下的文件名）；游戏宣传窗使用 */
+  icon?: string;
   /** 一扇窗口可放多段录屏；卡片封面取第一段 */
   clips: ReelClip[];
 }
@@ -132,6 +134,7 @@ export const games: GameReel[] = [
     id: 'swordsman',
     name: '剑士',
     line: 'Godot 动作肉鸽游戏',
+    icon: 'swordsman-icon.png',
     url: 'https://favoroo.github.io/Q-xiuxian/site/',
     clips: [
       {
@@ -147,6 +150,7 @@ export const games: GameReel[] = [
     id: 'dudu',
     name: '嘟嘟羽毛球',
     line: 'Cocos 休闲竞技游戏',
+    icon: 'dudu-icon.png',
     url: 'https://favoroo.github.io/Dudu-Badminton/site/',
     clips: [
       {

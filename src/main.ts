@@ -55,9 +55,12 @@ function reelHTML(r: Reel, i: number, { reveal = true }: { reveal?: boolean } = 
         <svg viewBox="0 0 24 24"><path d="M6 3.8v16.4c0 .9 1 1.5 1.8 1L21.4 13a1.2 1.2 0 0 0 0-2L7.8 2.9C7 2.4 6 2.9 6 3.8z"/></svg>
       </span>
     </span>
-    <span class="reel__caption">
-      <span class="reel__name">${r.name}</span>
-      <span class="reel__line">${r.line}</span>
+    <span class="reel__caption${r.icon ? ' reel__caption--icon' : ''}">
+      ${r.icon ? `<img class="reel__icon" src="${mediaURL(`img/${r.icon}`)}" alt="" width="44" height="44" loading="lazy" decoding="async" />` : ''}
+      <span class="reel__caption__main">
+        <span class="reel__name">${r.name}</span>
+        <span class="reel__line">${r.line}</span>
+      </span>
     </span>
   </button>`;
 }
