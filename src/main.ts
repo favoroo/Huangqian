@@ -332,7 +332,7 @@ function gameHTML(g: GameReel, i: number): string {
     dashLength: 4,
     dashGap: 2,
     specks: 15,
-    intro: 'assemble',
+    intro: 'type',
     introDuration: 2,
     clickKick: true,
     guides: false,
