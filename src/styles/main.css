@@ -113,17 +113,46 @@ button {
    入场动画系统（IO + sweep 双保险在 main.ts）
    ========================================================================== */
 
-.reveal {
+/* 入场走 keyframes 而不是 transition：.reel / .card / .career__cta 等组件
+   自带的 transition 声明会按级联覆盖 .reveal 的 transition，入场会被静默杀掉；
+   animation 与组件 hover 过渡各走各的通道，互不影响。 */
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes reveal-line-up {
+  from {
+    transform: translateY(110%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes reveal-rule-x {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* 预入场隐藏态挂在 :not(.is-in) 上；动画播完（backwards 不保留终态）
+   元素回到自然样式，hover 抬升等组件过渡照常工作 */
+.reveal:not(.is-in) {
   opacity: 0;
   transform: translateY(26px);
-  transition:
-    opacity 650ms var(--ease),
-    transform 650ms var(--ease);
-  transition-delay: var(--rd, 0ms);
 }
 .reveal.is-in {
-  opacity: 1;
-  transform: none;
+  animation: reveal-up 650ms var(--ease) backwards;
+  animation-delay: var(--rd, 0ms);
 }
 
 .reveal-line {
@@ -132,23 +161,23 @@ button {
 }
 .reveal-line > span {
   display: block;
-  transform: translateY(110%);
-  transition: transform 800ms var(--ease);
-  transition-delay: var(--rd, 0ms);
 }
-.is-in .reveal-line > span,
+.reveal-line:not(.is-in) > span {
+  transform: translateY(110%);
+}
 .reveal-line.is-in > span {
-  transform: none;
+  animation: reveal-line-up 800ms var(--ease) backwards;
+  animation-delay: var(--rd, 0ms);
 }
 
 .reveal-rule {
-  transform: scaleX(0);
   transform-origin: left;
-  transition: transform 900ms var(--ease) 250ms;
 }
-.reveal-rule.is-in,
-.is-in .reveal-rule {
-  transform: scaleX(1);
+.reveal-rule:not(.is-in) {
+  transform: scaleX(0);
+}
+.reveal-rule.is-in {
+  animation: reveal-rule-x 900ms var(--ease) 250ms backwards;
 }
 
 /* ==========================================================================
@@ -221,6 +250,13 @@ button {
 .nav__link:hover::after {
   transform: scaleX(1);
 }
+/* scroll-spy：滚动到对应区块时下划线常驻 */
+.nav__link.is-active {
+  color: var(--ink);
+}
+.nav__link.is-active::after {
+  transform: scaleX(1);
+}
 
 .nav__meta {
   font-size: 11px;
@@ -243,29 +279,30 @@ button {
   right: 10px;
   height: 1.5px;
   background: var(--ink);
-  transition:
-    transform var(--dur) var(--ease),
-    top var(--dur) var(--ease);
+  transition: transform var(--dur) var(--ease);
 }
 .nav__burger span {
   top: 50%;
 }
+/* 三线位移全走 transform，top 保持静态，不触发布局 */
+.nav__burger span::before,
+.nav__burger span::after {
+  top: 0;
+}
 .nav__burger span::before {
-  top: -7px;
+  transform: translateY(-7px) rotate(0deg);
 }
 .nav__burger span::after {
-  top: 7px;
+  transform: translateY(7px) rotate(0deg);
 }
 body[data-menu-open] .nav__burger span {
   background: transparent;
 }
 body[data-menu-open] .nav__burger span::before {
-  top: 0;
-  transform: rotate(45deg);
+  transform: translateY(0) rotate(45deg);
 }
 body[data-menu-open] .nav__burger span::after {
-  top: 0;
-  transform: rotate(-45deg);
+  transform: translateY(0) rotate(-45deg);
 }
 
 /* ---------- 移动端全屏菜单 ---------- */
@@ -327,7 +364,27 @@ body[data-menu-open] {
   font-size: clamp(34px, 9vw, 52px);
   padding: 20px 0;
   border-top: 1px solid var(--line);
-  transition: color var(--dur) var(--ease);
+  /* 打开时逐条上移错峰；关闭态无延迟，随容器一起快速淡出 */
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    color var(--dur) var(--ease),
+    opacity 420ms var(--ease),
+    transform 480ms var(--ease);
+}
+body[data-menu-open] .menu__item {
+  opacity: 1;
+  transform: none;
+}
+/* delay 列表与 transition 属性一一对应：color 恒为 0（hover 即时响应） */
+body[data-menu-open] .menu__item:nth-child(1) {
+  transition-delay: 0s, 140ms, 140ms;
+}
+body[data-menu-open] .menu__item:nth-child(2) {
+  transition-delay: 0s, 210ms, 210ms;
+}
+body[data-menu-open] .menu__item:nth-child(3) {
+  transition-delay: 0s, 280ms, 280ms;
 }
 .menu__item span {
   font-family: var(--sans);
@@ -445,6 +502,8 @@ body[data-menu-open] {
   -webkit-text-stroke: 1px rgba(255, 255, 255, 0.07);
   pointer-events: none;
   user-select: none;
+  /* 缓慢视差：JS 按区块相对视口的位置写入 --no-shift（reduced-motion 不启用） */
+  transform: translateY(var(--no-shift, 0px));
 }
 
 /* ==========================================================================
@@ -575,12 +634,16 @@ body[data-menu-open] {
   overflow: hidden;
   transition:
     border-color var(--dur) var(--ease),
-    background-color var(--dur) var(--ease);
+    background-color var(--dur) var(--ease),
+    transform var(--dur) var(--ease);
 }
 .reel:hover,
 .reel:focus-visible {
   border-color: rgba(255, 255, 255, 0.34);
   background: var(--bg-hover);
+}
+.reel:hover {
+  transform: translateY(-4px);
 }
 
 /* 窗口标题栏 —— 让它读起来像一扇窗口而不是一张缩略图 */
@@ -843,6 +906,11 @@ body[data-menu-open] {
   height: 100%;
   object-fit: contain;
   background: #000;
+  /* 换分段时先淡到黑，canplay 后淡回：硬切变淡切，也盖住换片闪黑 */
+  transition: opacity 160ms var(--ease);
+}
+.lightbox__stage.is-switching video {
+  opacity: 0;
 }
 
 /* ---------- 弹窗分段标签（同一窗口有多段录屏时出现） ---------- */
@@ -995,36 +1063,12 @@ body[data-menu-open] {
   border-color: rgba(255, 255, 255, 0.3);
 }
 
-.card__media {
-  overflow: hidden;
-  aspect-ratio: 16 / 10;
-}
-.card__media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 500ms var(--ease);
-}
-.card:hover .card__media img {
-  transform: scale(1.03);
-}
-
 .card__body {
   padding: clamp(18px, 2vw, 26px);
   display: flex;
   align-items: center;
   gap: 12px;
   min-width: 0;
-}
-.card__nameIcon {
-  width: 40px;
-  height: 40px;
-  flex: none;
-  border-radius: 9px;
-  transition: transform 500ms var(--ease);
-}
-.card:hover .card__nameIcon {
-  transform: scale(1.08);
 }
 .card__name {
   font-family: var(--serif);
@@ -1144,9 +1188,11 @@ body[data-menu-open] {
   border-bottom: 1px solid var(--line);
   font-family: var(--serif);
   font-size: clamp(19px, 2.4vw, 28px);
-  transition:
-    color var(--dur) var(--ease),
-    padding-left var(--dur) var(--ease);
+  transition: color var(--dur) var(--ease);
+}
+/* hover 缩进走 transform：过渡 padding 会拖动 border-bottom 并触发重排 */
+.contact__link > span:first-child {
+  transition: transform var(--dur) var(--ease);
 }
 .contact__link .arrow {
   color: var(--dim);
@@ -1156,7 +1202,9 @@ body[data-menu-open] {
 }
 .contact__link:hover {
   color: var(--red);
-  padding-left: 14px;
+}
+.contact__link:hover > span:first-child {
+  transform: translateX(10px);
 }
 .contact__link:hover .arrow {
   color: var(--red);
@@ -1310,25 +1358,37 @@ body[data-menu-open] {
   html {
     scroll-behavior: auto;
   }
-  .reveal,
-  .reveal-line > span,
-  .reveal-rule {
-    transition: opacity 200ms linear;
+  /* 入场三件套直接呈现：同等特异性 + 靠后源顺序压住 :not(.is-in) 的隐藏态 */
+  .reveal:not(.is-in),
+  .reveal.is-in,
+  .reveal-line:not(.is-in) > span,
+  .reveal-line.is-in > span,
+  .reveal-rule:not(.is-in),
+  .reveal-rule.is-in {
+    animation: none;
+    opacity: 1;
     transform: none;
   }
   .nav {
     animation: none;
     opacity: 1;
   }
-  .card__media img,
   .card--compact .card__icon,
   .card__arrow,
   .contact__link,
+  .contact__link > span:first-child,
   .contact__link .arrow,
+  .reel,
   .reel__poster,
   .reel__play,
-  .reel__dots i {
+  .reel__dots i,
+  .menu__item,
+  .lightbox__stage video {
     transition: none;
+  }
+  .menu__item {
+    opacity: 1;
+    transform: none;
   }
   .lightbox[open],
   .lightbox[open]::backdrop,

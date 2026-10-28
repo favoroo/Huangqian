@@ -1,5 +1,5 @@
 // TechText —— 工程图纸风格的交互标题：指针掠过把字母变成虚线轮廓，
-// 选中框带角标、尺寸标签和采样噪点，字母可拖拽回弹，点击弹起并带动邻居。
+// 选中框带角标和采样噪点，拖拽时显示位移标注，字母可拖拽回弹，点击弹起并带动邻居。
 // 移植自 React Bits 的 TechText 组件（React 外壳剥掉，Canvas 逻辑原样保留）。
 
 export type TechTextAlign = 'left' | 'center' | 'right';
@@ -525,17 +525,18 @@ export class TechText {
 
       if (s.specks > 0) drawSpecks(s, a, accent);
 
-      if (!s.labels) return;
+      // 静态「字 宽 × 高」标注已去掉：句号这类窄字符会浮出突兀的 20 × 20；只保留拖拽时的位移标注
+      if (!s.labels || moved <= 1) return;
       ctx.font = LABEL_FONT;
       ctx.textAlign = 'left';
       ctx.textBaseline = 'bottom';
       ctx.fillStyle = accent;
       ctx.globalAlpha = 0.62 * a;
-      const label =
-        moved > 1
-          ? `${signed(Math.round(glyph.offset.x))}, ${signed(Math.round(-glyph.offset.y))}`
-          : `${glyph.char}  ${Math.round(glyph.box.x2 - glyph.box.x1)} × ${Math.round(glyph.box.y2 - glyph.box.y1)}`;
-      ctx.fillText(label, Math.round(frame.x1), Math.round(frame.y1) - 7);
+      ctx.fillText(
+        `${signed(Math.round(glyph.offset.x))}, ${signed(Math.round(-glyph.offset.y))}`,
+        Math.round(frame.x1),
+        Math.round(frame.y1) - 7,
+      );
       ctx.globalAlpha = 1;
     };
 

@@ -13,9 +13,9 @@ const mediaURL = (u: string) => (u.startsWith('http') ? u : `${base}${u}`);
 
 /* ---------- 作品卡渲染 ---------- */
 
-function compactHTML(w: Work): string {
+function compactHTML(w: Work, i: number): string {
   return `
-  <a class="card card--compact reveal" href="${w.url}" target="_blank" rel="noopener" aria-label="访问 ${w.name} 站点">
+  <a class="card card--compact reveal" style="--rd:${120 + i * 90}ms" href="${w.url}" target="_blank" rel="noopener" aria-label="访问 ${w.name} 站点">
     <img class="card__icon" src="${imgRaw(w.media)}" alt="${w.mediaAlt}" loading="lazy" />
     <div class="card__body">
       <h3 class="card__name">${w.name}</h3>
@@ -35,7 +35,7 @@ function compactHTML(w: Work): string {
     </div>
     <div class="works__group works__group--app">
       <p class="works__label reveal">应用</p>
-      <div class="works__items">${works.map((w) => compactHTML(w)).join('')}</div>
+      <div class="works__items">${works.map((w, i) => compactHTML(w, i)).join('')}</div>
     </div>`;
 })();
 
@@ -188,6 +188,8 @@ function gameHTML(g: GameReel, i: number): string {
       t.classList.toggle('is-active', i === index);
       t.setAttribute('aria-current', i === index ? 'true' : 'false');
     });
+    // 换片先淡到黑，canplay 后淡回：硬切变淡切，也盖住换源瞬间的闪黑
+    stage?.classList.add('is-switching');
     video.poster = mediaURL(clip.poster.startsWith('http') ? clip.poster : `img/${clip.poster}`);
     // 弹窗是用户主动点击触发（已有用户手势交互），默认开启声音
     video.muted = false;
@@ -197,6 +199,7 @@ function gameHTML(g: GameReel, i: number): string {
     // 舞台按本段视频的宽高比自适应（录屏 2:1，游戏宣传片 16:9 / 20:9）
     stage?.style.setProperty('--lb-aspect', clip.aspect ?? '');
     const start = () => {
+      stage?.classList.remove('is-switching');
       video.play().catch(() => {
         // 如果被某些严格策略阻止带声起播，降级为静音重试，保证视频能正常播
         video.muted = true;
@@ -244,6 +247,9 @@ function gameHTML(g: GameReel, i: number): string {
     video.removeAttribute('src');
     video.load();
   };
+
+  // 加载失败也要撤掉淡切黑屏，把错误态直接露出来
+  video.addEventListener('error', () => stage?.classList.remove('is-switching'));
 
   // 关闭走一段快速淡出，动画结束后才真正 close()
   let closeSeq = 0;
@@ -326,7 +332,7 @@ function gameHTML(g: GameReel, i: number): string {
     dashLength: 4,
     dashGap: 2,
     specks: 15,
-    intro: 'none',
+    intro: 'assemble',
     introDuration: 2,
     clickKick: true,
     guides: false,
@@ -380,7 +386,39 @@ function gameHTML(g: GameReel, i: number): string {
   };
   burger.addEventListener('click', () => setMenu(!document.body.hasAttribute('data-menu-open')));
   close.addEventListener('click', () => setMenu(false));
-  menuEl.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setMenu(false)));
+  // 菜单锚点不走原生 hash 跳转：iOS 会先瞬移到目标再平滑滚（闪一下）。
+  // 改为两段式：先让菜单淡出（期间页面原地不动），淡出结束后再平滑滚向目标，
+  // 滚动全程可见。scrollIntoView 不传 behavior，跟随 html 的 scroll-behavior
+  // ——正常时平滑，prefers-reduced-motion 下自动变瞬时。
+  let navSeq = 0;
+  menuEl.querySelectorAll('a').forEach((a) =>
+    a.addEventListener('click', (e) => {
+      const target = a.hash ? document.querySelector<HTMLElement>(a.hash) : null;
+      if (!target) return;
+      e.preventDefault();
+      setMenu(false);
+      const seq = ++navSeq;
+      const go = () => {
+        // 等待期间重开菜单或有更新的跳转，这次就不滚了
+        if (seq !== navSeq || document.body.hasAttribute('data-menu-open')) return;
+        target.scrollIntoView();
+        if (location.hash !== a.hash) history.pushState(null, '', a.hash);
+      };
+      // 监听淡出结束再开滚；个别内嵌内核不派发 transitionend，定时器兜底
+      let settled = false;
+      const settle = () => {
+        if (settled) return;
+        settled = true;
+        menuEl.removeEventListener('transitionend', onFadeEnd);
+        go();
+      };
+      const onFadeEnd = (e: TransitionEvent) => {
+        if (e.target === menuEl && e.propertyName === 'opacity') settle();
+      };
+      menuEl.addEventListener('transitionend', onFadeEnd);
+      setTimeout(settle, 420); // --dur 350ms + 余量
+    }),
+  );
   addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && document.body.hasAttribute('data-menu-open')) setMenu(false);
   });
@@ -396,9 +434,11 @@ function gameHTML(g: GameReel, i: number): string {
     return;
   }
   const shown = new WeakSet<Element>();
+  let remaining = targets.length;
   const mark = (el: Element) => {
     if (shown.has(el)) return;
     shown.add(el);
+    remaining--;
     el.classList.add('is-in');
   };
   const io = new IntersectionObserver(
@@ -416,9 +456,65 @@ function gameHTML(g: GameReel, i: number): string {
     return r.top < innerHeight * 0.96 && r.bottom > 0;
   };
   const sweep = () => targets.filter(inView).forEach(mark);
-  requestAnimationFrame(sweep);
+
+  // 背景超大编号的缓慢视差（±24px），与 sweep 共用同一条 rAF 节流的滚动通道
+  const noSections = [...document.querySelectorAll<HTMLElement>('[data-no]')];
+  const parallax = () => {
+    for (const s of noSections) {
+      const r = s.getBoundingClientRect();
+      const vh = innerHeight;
+      if (r.bottom < -80 || r.top > vh + 80) continue;
+      const p = Math.max(-1, Math.min(1, (r.top + r.height / 2 - vh / 2) / vh));
+      s.style.setProperty('--no-shift', `${(-p * 24).toFixed(1)}px`);
+    }
+  };
+
+  const frame = () => {
+    sweep();
+    parallax();
+  };
+  requestAnimationFrame(frame);
   setTimeout(sweep, 600);
   // belt & braces: some embedded webviews never deliver IO callbacks;
   // a passive scroll sweep keeps the page correct everywhere.
-  addEventListener('scroll', sweep, { passive: true });
+  // rAF 节流：每次滚动至多跑一帧；全部入场后 sweep 走空，只剩视差的 rect 读取
+  let ticket = 0;
+  const onScroll = () => {
+    if (ticket) return;
+    ticket = requestAnimationFrame(() => {
+      ticket = 0;
+      if (remaining > 0) sweep();
+      parallax();
+    });
+  };
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', onScroll, { passive: true });
+})();
+
+/* ---------- 导航当前区块高亮（scroll-spy） ---------- */
+
+(function spy() {
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('.nav__link[href^="#"]')];
+  if (!links.length || !('IntersectionObserver' in window)) return;
+  let activeId: string | null = null;
+  const setActive = (id: string | null) => {
+    activeId = id;
+    for (const l of links) l.classList.toggle('is-active', !!id && l.hash === `#${id}`);
+  };
+  const io = new IntersectionObserver(
+    (entries) => {
+      for (const en of entries) {
+        const id = (en.target as HTMLElement).id;
+        if (en.isIntersecting) setActive(id);
+        // 滚回首屏（hero 不参与高亮）时清掉残留的高亮
+        else if (activeId === id) setActive(null);
+      }
+    },
+    // 视口上中部一条窄带：穿过即视为「正在看这个区块」
+    { rootMargin: '-35% 0px -60% 0px' },
+  );
+  for (const l of links) {
+    const s = document.getElementById(l.hash.slice(1));
+    if (s) io.observe(s);
+  }
 })();

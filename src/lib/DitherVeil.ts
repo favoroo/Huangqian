@@ -722,7 +722,8 @@ export class DitherVeil {
       viewUniforms.uContrast.value = s.contrast;
       viewUniforms.uBrightness.value = s.brightness;
       viewUniforms.uReverse.value = s.reverse ? 1 : 0;
-      const intro = image ? Math.min(1, (now - introStart) / INTRO_MS) : 0;
+      // reduced-motion 下跳过 1100ms 点阵渐显，直接呈现完整图像
+      const intro = !image ? 0 : reducedMotion ? 1 : Math.min(1, (now - introStart) / INTRO_MS);
       viewUniforms.uIntro.value = 1 - Math.pow(1 - intro, 2);
       renderer.render({ scene: viewMesh });
 

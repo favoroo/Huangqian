@@ -6,6 +6,8 @@
     <title>黄谦的个人网站</title>
     <meta name="description" content="黄谦的个人作品集：汽车诊断工程师、部门 AI 提效负责人、独立开发者。" />
     <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
+    <!-- 首屏大图：DitherVeil 的 WebGL 纹理，也是 LCP 候选，提前发起请求 -->
+    <link rel="preload" as="image" href="%BASE_URL%img/veil-photo.webp" />
     <meta property="og:title" content="黄谦的个人网站" />
     <meta property="og:description" content="用AI把想法落地。" />
     <meta property="og:type" content="website" />
@@ -128,7 +130,7 @@
             <span>电话/微信 13789130001</span><span class="arrow" aria-hidden="true">→</span>
           </a>
         </div>
-        <p class="contact__bottom">© 2026 黄谦 · HUANGQIAN</p>
+        <p class="contact__bottom reveal" style="--rd:320ms">© 2026 黄谦 · HUANGQIAN</p>
       </div>
     </footer>
 
