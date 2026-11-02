@@ -62,6 +62,8 @@ export interface ReelClip {
   poster: string;
   /** 完整高清视频地址：点开弹窗播放 */
   src: string;
+  /** 备用视频源：主源编码（如 AV1）解码失败时降级播放 */
+  fallbackSrc?: string;
   /** 轻量预览短片（几秒低码率无声微视频，仅 20~60KB，用于卡片悬浮秒播） */
   previewSrc?: string;
 }
@@ -166,6 +168,24 @@ export const games: GameReel[] = [
         poster: 'https://favoroo.github.io/Dudu-Badminton/site/img/poster.webp',
         src: 'https://favoroo.github.io/Dudu-Badminton/site/video/promo.mp4',
         previewSrc: 'videos/preview/dudu.mp4',
+      },
+    ],
+  },
+  {
+    id: 'moshuizuozhan',
+    name: '墨水大作战',
+    line: '<strong>Unity</strong> 涂地对战游戏',
+    icon: 'moshuizuozhan-icon.png',
+    url: 'https://favoroo.github.io/moshuizuozhan',
+    clips: [
+      {
+        label: '宣传片',
+        duration: '00:41',
+        aspect: '20 / 9',
+        poster: 'https://favoroo.github.io/moshuizuozhan/img/hero_poster.webp?v=0.1.12.7354',
+        src: 'https://favoroo.github.io/moshuizuozhan/video/promo.av1.mp4?v=0.1.12.7354',
+        fallbackSrc: 'https://favoroo.github.io/moshuizuozhan/video/promo.mp4',
+        previewSrc: 'videos/preview/moshuizuozhan.mp4',
       },
     ],
   },

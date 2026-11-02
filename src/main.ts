@@ -206,6 +206,13 @@ function gameHTML(g: GameReel, i: number): string {
         void video.play().catch(() => {});
       });
     };
+    // 主源解码失败（如 AV1 在部分旧设备上不被支持）时降级到备用源，只降一级避免死循环
+    video.onerror = () => {
+      if (!clip.fallbackSrc || video.src === mediaURL(clip.fallbackSrc)) return;
+      video.src = mediaURL(clip.fallbackSrc);
+      video.load();
+      video.addEventListener('canplay', start, { once: true });
+    };
     if (video.readyState >= 3) start();
     else video.addEventListener('canplay', start, { once: true });
   };
@@ -243,6 +250,7 @@ function gameHTML(g: GameReel, i: number): string {
 
   // 幂等收尾：无论走按钮、遮罩、Esc 还是原生 dialog 关闭，都能安全重复执行
   const cleanup = () => {
+    video.onerror = null;
     video.pause();
     video.removeAttribute('src');
     video.load();
