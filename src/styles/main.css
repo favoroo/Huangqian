@@ -558,7 +558,7 @@ body[data-menu-open] .menu__item:nth-child(3) {
   transform: translateX(5px);
 }
 
-/* 顶部信息栏：时间 / 公司 靠左，履历按钮靠右 */
+/* 顶部信息栏：时间 / 学校 / 公司 靠左，履历按钮靠右 */
 .career__head {
   display: flex;
   flex-wrap: wrap;
@@ -570,28 +570,35 @@ body[data-menu-open] .menu__item:nth-child(3) {
   margin-bottom: clamp(32px, 5vh, 56px);
 }
 
+/* 事实栏：两行「时间 + 学校 / 时间 + 公司」，四列随内容自适应并严格对齐 */
 .career__facts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: clamp(28px, 6vw, 96px);
-}
-.career__fact {
-  display: flex;
+  display: grid;
+  grid-template-columns: max-content max-content max-content max-content;
+  justify-content: start;
+  column-gap: clamp(12px, 1.4vw, 18px);
+  row-gap: clamp(8px, 1.2vh, 12px);
   align-items: baseline;
-  gap: clamp(12px, 1.4vw, 18px);
-  min-width: 0;
 }
-.career__fact dt {
+.career__facts dt {
   font-size: 12px;
   letter-spacing: 0.2em;
   color: var(--dim);
-  flex: none;
 }
-.career__fact dd {
+.career__facts dd {
   font-family: var(--serif);
   font-size: clamp(16px, 1.5vw, 20px);
   min-width: 0;
   overflow-wrap: anywhere;
+}
+/* 学校与专业之间的分隔点，弱化处理 */
+.career__sep {
+  margin-inline: 0.45em;
+  color: var(--dim);
+}
+/* 学校/公司这一组前留出大间距；两行都要加，标签才会严格对齐 */
+.career__facts > dt:nth-of-type(2),
+.career__facts > dt:nth-of-type(4) {
+  padding-left: clamp(28px, 6vw, 96px);
 }
 
 /* ---------- 录屏窗口：三扇并排的小窗口 ---------- */
@@ -1295,12 +1302,23 @@ body[data-menu-open] .menu__item:nth-child(3) {
   }
 }
 
+@media (max-width: 760px) {
+  /* 四列排不下：改成「标签 / 值」两列，每项独占一行 */
+  .career__facts {
+    grid-template-columns: max-content minmax(0, 1fr);
+  }
+  .career__facts > dt:nth-of-type(2),
+  .career__facts > dt:nth-of-type(4) {
+    padding-left: 0;
+  }
+}
+
 @media (max-width: 560px) {
   .hero__tag {
     font-size: 17px;
   }
 
-  /* 窄屏：履历链接另起一行，避免与 时间/公司 抢位置 */
+  /* 窄屏：履历链接另起一行，避免与 时间/学校/公司 抢位置 */
   .career__head {
     align-items: flex-start;
     flex-direction: column;
