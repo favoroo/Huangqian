@@ -134,6 +134,8 @@ export const reels: Reel[] = [
 export interface GameReel extends Reel {
   /** 游戏官网 */
   url: string;
+  /** TapTap 商店页 */
+  tapUrl: string;
 }
 
 export const games: GameReel[] = [
@@ -143,6 +145,7 @@ export const games: GameReel[] = [
     line: '<strong>Godot</strong> 动作肉鸽游戏',
     icon: 'swordsman-icon.png',
     url: 'https://favoroo.github.io/Q-xiuxian/site/',
+    tapUrl: 'https://tap.cn/lMjF3T4Oh',
     clips: [
       {
         label: '宣传片',
@@ -155,28 +158,12 @@ export const games: GameReel[] = [
     ],
   },
   {
-    id: 'dudu',
-    name: '嘟嘟羽毛球',
-    line: '<strong>Cocos</strong> 休闲竞技游戏',
-    icon: 'dudu-icon.png',
-    url: 'https://favoroo.github.io/Dudu-Badminton/site/',
-    clips: [
-      {
-        label: '宣传片',
-        duration: '00:16',
-        aspect: '20 / 9',
-        poster: 'https://favoroo.github.io/Dudu-Badminton/site/img/poster.webp',
-        src: 'https://favoroo.github.io/Dudu-Badminton/site/video/promo.mp4',
-        previewSrc: 'videos/preview/dudu.mp4',
-      },
-    ],
-  },
-  {
     id: 'moshuizuozhan',
     name: '墨水大作战',
     line: '<strong>Unity</strong> 涂地对战游戏',
     icon: 'moshuizuozhan-icon.png',
     url: 'https://favoroo.github.io/moshuizuozhan',
+    tapUrl: 'https://tap.cn/lORXo1h8h',
     clips: [
       {
         label: '宣传片',
@@ -186,6 +173,24 @@ export const games: GameReel[] = [
         src: 'https://favoroo.github.io/moshuizuozhan/video/promo.av1.mp4?v=0.1.12.7354',
         fallbackSrc: 'https://favoroo.github.io/moshuizuozhan/video/promo.mp4',
         previewSrc: 'videos/preview/moshuizuozhan.mp4',
+      },
+    ],
+  },
+  {
+    id: 'dudu',
+    name: '嘟嘟羽毛球',
+    line: '<strong>Cocos</strong> 休闲竞技游戏',
+    icon: 'dudu-icon.png',
+    url: 'https://favoroo.github.io/Dudu-Badminton/site/',
+    tapUrl: 'https://tap.cn/lxOAgABX5',
+    clips: [
+      {
+        label: '宣传片',
+        duration: '00:16',
+        aspect: '20 / 9',
+        poster: 'https://favoroo.github.io/Dudu-Badminton/site/img/poster.webp',
+        src: 'https://favoroo.github.io/Dudu-Badminton/site/video/promo.mp4',
+        previewSrc: 'videos/preview/dudu.mp4',
       },
     ],
   },

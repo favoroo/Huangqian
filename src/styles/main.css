@@ -1018,9 +1018,19 @@ body[data-menu-open] .menu__item:nth-child(3) {
   min-width: 0;
 }
 
+/* TapTap 图标只相对卡片定位，不受下方「访问站点」影响 */
+.gamework__card {
+  position: relative;
+}
+
 /* 宣传片是 16:9 / 20:9，统一压进 16:9 画面框，两扇窗口齐平 */
 .games__row .reel__frame {
   aspect-ratio: 16 / 9;
+}
+
+/* 游戏标题栏右侧留出图标位，避免长文案压到图标 */
+.games__row .reel__caption--icon {
+  padding-right: clamp(44px, 4.4vw, 52px);
 }
 
 .gamework__site {
@@ -1042,6 +1052,31 @@ body[data-menu-open] .menu__item:nth-child(3) {
 }
 .gamework__site:hover .arrow {
   transform: translateX(6px);
+}
+
+/* TapTap 商店入口：只放品牌图标，叠在卡片标题栏右侧（a 不能嵌进 button 里） */
+.gamework__taptap {
+  position: absolute;
+  right: clamp(12px, 1.2vw, 16px);
+  /* 与标题栏文字底边对齐（同 caption 的下内边距） */
+  bottom: clamp(14px, 1.4vw, 18px);
+  z-index: 2;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  overflow: hidden;
+  opacity: 0.88;
+  transition:
+    opacity var(--dur) var(--ease),
+    transform var(--dur) var(--ease);
+}
+.gamework__taptap img {
+  width: 100%;
+  height: 100%;
+}
+.gamework__taptap:hover {
+  opacity: 1;
+  transform: scale(1.1);
 }
 
 /* ---------- 应用段：三张紧凑卡一行排开 ---------- */

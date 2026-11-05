@@ -66,11 +66,16 @@ function reelHTML(r: Reel, i: number, { reveal = true }: { reveal?: boolean } = 
   </button>`;
 }
 
-/** 游戏宣传窗：复用录屏卡外观；站点链接放卡外，button 里不能嵌链接 */
+/** 游戏宣传窗：复用录屏卡外观；站点链接与 TapTap 图标放卡外，button 里不能嵌链接 */
 function gameHTML(g: GameReel, i: number): string {
   return `
   <div class="gamework reveal" style="--rd:${120 + i * 110}ms">
-    ${reelHTML(g, i, { reveal: false })}
+    <div class="gamework__card">
+      ${reelHTML(g, i, { reveal: false })}
+      <a class="gamework__taptap" href="${g.tapUrl}" target="_blank" rel="noopener" aria-label="在 TapTap 打开「${g.name}」" title="TapTap">
+        <img src="${imgRaw('taptap-icon.png')}" alt="" width="26" height="26" loading="lazy" decoding="async" />
+      </a>
+    </div>
     <a class="gamework__site" href="${g.url}" target="_blank" rel="noopener">访问站点 <span class="arrow" aria-hidden="true">→</span></a>
   </div>`;
 }
