@@ -264,6 +264,25 @@ button {
   color: var(--dim);
 }
 
+/* 简历下载：细描边小按钮，悬停转为朱红 */
+.nav__resume {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 13px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--ink);
+  transition:
+    color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease),
+    background-color var(--dur) var(--ease);
+}
+.nav__resume:hover {
+  border-color: var(--red);
+  background: rgba(224, 52, 43, 0.08);
+}
+
 .nav__burger {
   display: none;
   width: 44px;
@@ -385,6 +404,9 @@ body[data-menu-open] .menu__item:nth-child(2) {
 }
 body[data-menu-open] .menu__item:nth-child(3) {
   transition-delay: 0s, 280ms, 280ms;
+}
+body[data-menu-open] .menu__item:nth-child(4) {
+  transition-delay: 0s, 350ms, 350ms;
 }
 .menu__item span {
   font-family: var(--sans);
@@ -1269,8 +1291,17 @@ body[data-menu-open] .menu__item:nth-child(3) {
   .nav__meta {
     display: none;
   }
+  /* 简历按钮在移动端保留，与汉堡按钮并排；收紧间距避免挤出容器 */
+  .nav__links {
+    gap: 12px;
+  }
+  .nav__resume {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
   .nav__burger {
     display: block;
+    flex-shrink: 0;
   }
 
   .hero__grid {
